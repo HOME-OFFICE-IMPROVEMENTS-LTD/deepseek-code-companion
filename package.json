@@ -3,21 +3,54 @@
   "displayName": "DeepSeek Code Companion",
   "description": "Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.",
   "version": "0.0.1",
+  "icon": "images/DeepSeek-icon.png",
   "engines": {
     "vscode": "^1.103.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:deepSeekChatView"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "deepSeek-code-companion.helloWorld",
-        "title": "Hello World"
+        "command": "deepSeek-code-companion.focusChat",
+        "title": "Focus DeepSeek Chat",
+        "category": "DeepSeek"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "deepseek-activity",
+          "title": "DeepSeek",
+          "icon": "images/DeepSeek-icon.png"
+        }
+      ]
+    },
+    "views": {
+      "deepseek-activity": [
+        {
+          "type": "webview",
+          "id": "deepSeekChatView",
+          "name": "Chat",
+          "icon": "images/DeepSeek-icon.png"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DeepSeek",
+      "properties": {
+        "deepSeek.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your DeepSeek API key"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

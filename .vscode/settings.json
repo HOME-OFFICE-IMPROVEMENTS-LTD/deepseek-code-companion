@@ -9,5 +9,17 @@
 		"dist": true // set this to false to include "dist" folder in search results
 	},
 	// Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-	"typescript.tsc.autoDetect": "off"
+	"typescript.tsc.autoDetect": "off",
+	"editor.experimental.preferTreeSitter.regex": true,
+	"diffEditor.experimental.useTrueInlineView": true,
+	"workbench.commandPalette.preserveInput": true,
+	"debug.allowBreakpointsEverywhere": true,
+	"debug.console.acceptSuggestionOnEnter": "on",
+	"debug.showBreakpointsInOverviewRuler": true,
+	"terminal.integrated.accessibleViewPreserveCursorPosition": true,
+	"terminal.integrated.ignoreBracketedPasteMode": true,
+	"deepSeek.apiKey": "sk-64af3c31a7de431fbb3225770e2c36c9",
+	"github.copilot.chat.agent.thinkingTool": true,
+	"editor.defaultFormatter": "GitHub.copilot",
+	"notebook.defaultFormatter": "GitHub.copilot"
 }
