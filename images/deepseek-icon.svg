@@ -1,0 +1,19 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- DeepSeek inspired icon with modern, minimal design -->
+  
+  <!-- Background circle -->
+  <circle cx="12" cy="12" r="11" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="0.5"/>
+  
+  <!-- Main DeepSeek logo elements -->
+  <!-- Stylized "D" and "S" combination -->
+  <path d="M7 8C7 7.44772 7.44772 7 8 7H12C14.7614 7 17 9.23858 17 12C17 14.7614 14.7614 17 12 17H8C7.44772 17 7 16.5523 7 16V8Z" fill="currentColor" opacity="0.8"/>
+  
+  <!-- Inner accent -->
+  <path d="M9 10C9 9.44772 9.44772 9 10 9H12C13.6569 9 15 10.3431 15 12C15 13.6569 13.6569 15 12 15H10C9.44772 15 9 14.5523 9 14V10Z" fill="currentColor" opacity="0.3"/>
+  
+  <!-- Central dot for "seek" concept -->
+  <circle cx="12" cy="12" r="2" fill="currentColor"/>
+  
+  <!-- Subtle search/AI indicator -->
+  <path d="M16 8L18 6M18 6L20 8M18 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+</svg>
