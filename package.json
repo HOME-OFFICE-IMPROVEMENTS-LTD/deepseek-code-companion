@@ -44,12 +44,45 @@
       ]
     },
     "configuration": {
-      "title": "DeepSeek",
+      "title": "DeepSeek Code Companion",
       "properties": {
-        "deepSeek.apiKey": {
+        "deepseekCodeCompanion.deepseekApiKey": {
           "type": "string",
           "default": "",
-          "description": "Your DeepSeek API key"
+          "description": "Your DeepSeek API key for accessing DeepSeek models",
+          "order": 1
+        },
+        "deepseekCodeCompanion.openrouterApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your OpenRouter API key for accessing 100+ AI models (optional)",
+          "order": 2
+        },
+        "deepseekCodeCompanion.defaultModel": {
+          "type": "string",
+          "default": "deepseek-chat",
+          "description": "Default model to use for new conversations",
+          "order": 3
+        },
+        "deepseekCodeCompanion.dailyCostLimit": {
+          "type": "number",
+          "default": 5.0,
+          "minimum": 0.1,
+          "maximum": 100.0,
+          "description": "Daily API cost limit in USD to prevent accidental overspending",
+          "order": 4
+        },
+        "deepseekCodeCompanion.autoSwitchToDeepSeek": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically switch to DeepSeek models for code-related queries",
+          "order": 5
+        },
+        "deepseekCodeCompanion.showCostInChat": {
+          "type": "boolean",
+          "default": true,
+          "description": "Display API usage cost in chat interface",
+          "order": 6
         }
       }
     }
