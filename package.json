@@ -1,0 +1,142 @@
+{
+  "name": "deepseek-code-companion",
+  "displayName": "DeepSeek Code Companion",
+  "description": "Professional AI coding assistant for VS Code. Features include chat interface with DeepSeek AI, intelligent code generation, smart refactoring suggestions, and comprehensive workspace analysis.",
+  "version": "0.1.0",
+  "publisher": "home-office-improvements",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "Snippets",
+    "Formatters"
+  ],
+  "keywords": [
+    "ai",
+    "deepseek",
+    "chat",
+    "code generation",
+    "refactoring",
+    "assistant"
+  ],
+  "activationEvents": [
+    "onCommand:deepseek.openChat",
+    "onCommand:deepseek.generateCode",
+    "onCommand:deepseek.refactorCode",
+    "onCommand:deepseek.analyzeWorkspace"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "deepseek.openChat",
+        "title": "Open DeepSeek Chat",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.generateCode",
+        "title": "Generate Code",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.refactorCode",
+        "title": "Refactor Selection",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.analyzeWorkspace",
+        "title": "Analyze Workspace",
+        "category": "DeepSeek"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "deepseek.openChat",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d"
+      },
+      {
+        "command": "deepseek.generateCode",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g"
+      }
+    ],
+    "configuration": {
+      "title": "DeepSeek Code Companion",
+      "properties": {
+        "deepseek.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "DeepSeek API key for authentication"
+        },
+        "deepseek.model": {
+          "type": "string",
+          "default": "deepseek-coder",
+          "description": "DeepSeek model to use",
+          "enum": ["deepseek-coder", "deepseek-chat"]
+        },
+        "deepseek.enableCodeGeneration": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI-powered code generation"
+        },
+        "deepseek.enableRefactoring": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable smart refactoring suggestions"
+        },
+        "deepseek.enableWorkspaceAnalysis": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable comprehensive workspace analysis"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "deepseek-companion",
+          "title": "DeepSeek Companion",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "deepseek-companion": [
+        {
+          "id": "deepseek.chatView",
+          "name": "Chat",
+          "when": "true"
+        },
+        {
+          "id": "deepseek.workspaceView",
+          "name": "Workspace Analysis",
+          "when": "true"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "author": "Home Office Improvements Ltd",
+  "license": "MIT"
+}
