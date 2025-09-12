@@ -1,5 +1,5 @@
 {
-  "name": "deepSeek-code-companion",
+  "name": "deepseek-code-companion",
   "displayName": "DeepSeek Code Companion",
   "description": "Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.",
   "version": "0.0.1",

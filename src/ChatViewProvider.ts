@@ -51,7 +51,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
             switch (queryType) {
                 case 'workspace':
-                    await this._handleWorkspaceQuery(userMessage);
+                    const workspaceResponse = await this._handleWorkspaceQuery(userMessage);
+                    this._sendResponse(workspaceResponse);
                     break;
                 case 'file-analysis':
                 case 'code-context':
@@ -75,40 +76,213 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     private async _handleWorkspaceQuery(userMessage: string): Promise<string> {
         try {
-            if (userMessage.toLowerCase().includes('structure') || 
-                userMessage.toLowerCase().includes('summary') ||
-                userMessage.toLowerCase().includes('what files')) {
-                return await WorkspaceExplorer.getWorkspaceSummary();
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                return "❌ No workspace is currently open in VS Code.";
             }
             
-            if (userMessage.toLowerCase().includes('find') || 
-                userMessage.toLowerCase().includes('search')) {
-                // Extract search term (simple implementation)
-                const searchTerm = userMessage.split(/find|search/i)[1]?.trim() || '';
-                if (searchTerm) {
-                    const results = await WorkspaceExplorer.findFiles(searchTerm);
-                    if (results.length === 0) {
-                        return `🔍 No files found matching "${searchTerm}"`;
-                    }
-                    
-                    let response = `🔍 **Found ${results.length} files matching "${searchTerm}":**\n\n`;
-                    results.slice(0, 10).forEach(file => {
-                        response += `📄 ${file.name} (${file.language || 'Unknown'}) - ${file.path}\n`;
-                    });
-                    
-                    if (results.length > 10) {
-                        response += `\n... and ${results.length - 10} more files`;
-                    }
-                    
-                    return response;
-                }
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Check for file structure queries
+            if (lowerMessage.includes('structure') || lowerMessage.includes('tree') || lowerMessage.includes('hierarchy')) {
+                return await this._getFileStructure();
             }
             
-            // Default workspace response
-            return await WorkspaceExplorer.getWorkspaceSummary();
+            // Check for src directory queries
+            if (lowerMessage.includes('src directory') || lowerMessage.includes('files in src') || lowerMessage.includes('src folder')) {
+                return await this._getSrcDirectoryContents();
+            }
+            
+            // Check for TypeScript file queries
+            if (lowerMessage.includes('typescript') || lowerMessage.includes('.ts') || lowerMessage.includes('ts files')) {
+                return await this._getTypeScriptFiles();
+            }
+            
+            // Check for package.json queries
+            if (lowerMessage.includes('package.json') || lowerMessage.includes('package json')) {
+                return await this._findPackageJson();
+            }
+            
+            // Default workspace access response
+            let response = "📁 **Workspace Access:**\n\n";
+            response += "✅ Yes, I have access to your VS Code workspace!\n\n";
+            
+            for (const folder of workspaceFolders) {
+                response += `🗂️ **${folder.name}**\n`;
+                response += `� \`${folder.uri.fsPath}\`\n\n`;
+            }
+            
+            response += "� **What I can help with:**\n";
+            response += "• Analyze your code files\n";
+            response += "• Review and refactor code\n";
+            response += "• Answer questions about your project\n";
+            response += "• Generate new code based on your existing files\n\n";
+            response += "📝 Just share your code or ask me about specific files!";
+            
+            return response;
         } catch (error) {
             console.error('Error handling workspace query:', error);
-            return 'Sorry, I encountered an error while exploring your workspace.';
+            return 'Sorry, I encountered an error while checking workspace access.';
+        }
+    }
+
+    private async _getFileStructure(): Promise<string> {
+        try {
+            const allFiles = await vscode.workspace.findFiles('**/*', '**/node_modules/**', 50);
+            
+            let response = "📁 **File Structure:**\n\n";
+            
+            // Group files by directory
+            const filesByDir: { [key: string]: string[] } = {};
+            
+            allFiles.forEach(file => {
+                const relativePath = vscode.workspace.asRelativePath(file);
+                const dir = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : '.';
+                const fileName = relativePath.split('/').pop() || '';
+                
+                if (!filesByDir[dir]) {
+                    filesByDir[dir] = [];
+                }
+                filesByDir[dir].push(fileName);
+            });
+            
+            // Display structure
+            const sortedDirs = Object.keys(filesByDir).sort();
+            
+            for (const dir of sortedDirs.slice(0, 10)) { // Limit directories
+                if (dir === '.') {
+                    response += `📄 **Root files:**\n`;
+                } else {
+                    response += `📁 **${dir}/**\n`;
+                }
+                
+                const files = filesByDir[dir].slice(0, 8); // Limit files per directory
+                files.forEach(file => {
+                    const icon = this._getFileIcon(file);
+                    response += `   ${icon} ${file}\n`;
+                });
+                
+                if (filesByDir[dir].length > 8) {
+                    response += `   ... and ${filesByDir[dir].length - 8} more files\n`;
+                }
+                response += '\n';
+            }
+            
+            if (sortedDirs.length > 10) {
+                response += `... and ${sortedDirs.length - 10} more directories\n`;
+            }
+            
+            return response;
+        } catch (error) {
+            return `❌ Error reading file structure: ${error}`;
+        }
+    }
+
+    private async _getSrcDirectoryContents(): Promise<string> {
+        try {
+            const srcFiles = await vscode.workspace.findFiles('src/**/*', '**/node_modules/**', 30);
+            
+            if (srcFiles.length === 0) {
+                return "📁 **src/ Directory:**\n\n❌ No src directory found or it's empty.";
+            }
+            
+            let response = "📁 **src/ Directory Contents:**\n\n";
+            
+            srcFiles.forEach(file => {
+                const relativePath = vscode.workspace.asRelativePath(file);
+                const fileName = relativePath.split('/').pop() || '';
+                const icon = this._getFileIcon(fileName);
+                
+                response += `${icon} ${relativePath}\n`;
+            });
+            
+            response += `\n📊 Total: ${srcFiles.length} files in src/`;
+            return response;
+            
+        } catch (error) {
+            return `❌ Error reading src directory: ${error}`;
+        }
+    }
+
+    private async _getTypeScriptFiles(): Promise<string> {
+        try {
+            const tsFiles = await vscode.workspace.findFiles('**/*.ts', '**/node_modules/**', 30);
+            
+            if (tsFiles.length === 0) {
+                return "🔷 **TypeScript Files:**\n\n❌ No TypeScript files found in the workspace.";
+            }
+            
+            let response = "🔷 **TypeScript Files:**\n\n";
+            
+            tsFiles.forEach(file => {
+                const relativePath = vscode.workspace.asRelativePath(file);
+                response += `📄 ${relativePath}\n`;
+            });
+            
+            response += `\n📊 Total: ${tsFiles.length} TypeScript files`;
+            return response;
+            
+        } catch (error) {
+            return `❌ Error finding TypeScript files: ${error}`;
+        }
+    }
+
+    private async _findPackageJson(): Promise<string> {
+        try {
+            const packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**', 5);
+            
+            if (packageJsonFiles.length === 0) {
+                return "📋 **package.json:**\n\n❌ No package.json found in the workspace.";
+            }
+            
+            let response = "📋 **package.json Files:**\n\n";
+            
+            for (const file of packageJsonFiles) {
+                const relativePath = vscode.workspace.asRelativePath(file);
+                response += `📄 Found: ${relativePath}\n`;
+                
+                try {
+                    const content = await vscode.workspace.fs.readFile(file);
+                    const packageData = JSON.parse(content.toString());
+                    
+                    response += `📋 **Details:**\n`;
+                    response += `   • Name: ${packageData.name || 'N/A'}\n`;
+                    response += `   • Version: ${packageData.version || 'N/A'}\n`;
+                    response += `   • Description: ${packageData.description || 'N/A'}\n`;
+                    
+                    if (packageData.scripts) {
+                        const scriptCount = Object.keys(packageData.scripts).length;
+                        response += `   • Scripts: ${scriptCount} available\n`;
+                    }
+                    
+                } catch (parseError) {
+                    response += `❌ Error parsing package.json\n`;
+                }
+                response += '\n';
+            }
+            
+            return response;
+            
+        } catch (error) {
+            return `❌ Error finding package.json: ${error}`;
+        }
+    }
+
+    private _getFileIcon(fileName: string): string {
+        const extension = fileName.split('.').pop()?.toLowerCase() || '';
+        
+        switch (extension) {
+            case 'ts': return '🔷';
+            case 'js': return '🟨';
+            case 'json': return '📋';
+            case 'md': return '📝';
+            case 'css': return '🎨';
+            case 'html': return '🌐';
+            case 'png': 
+            case 'jpg': 
+            case 'gif': 
+            case 'svg': return '🖼️';
+            default: return '📄';
         }
     }
 
