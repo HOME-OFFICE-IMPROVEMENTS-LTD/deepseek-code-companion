@@ -4,6 +4,10 @@
   "description": "Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.",
   "version": "0.0.1",
   "icon": "images/deepseek-icon-128.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/msalsouri/deepseek-code-companion.git"
+  },
   "engines": {
     "vscode": "^1.103.0"
   },

@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { getDeepSeekResponse } from './deepSeekAPI';
+import { ContextAnalyzer } from './ContextAnalyzer';
+import { WorkspaceExplorer } from './WorkspaceExplorer';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'deepSeekChatView';
@@ -18,6 +20,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         webviewView.webview.onDidReceiveMessage(async data => {
+            console.log('🔍 CHAT DEBUG - Received message:', data);
             switch (data.type) {
                 case 'sendMessage':
                     await this._handleChatMessage(data.message);
@@ -33,23 +36,83 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async _handleChatMessage(userMessage: string) {
+        console.log('🔍 CHAT DEBUG - Handling message:', userMessage);
+        
         try {
-            // Get current code context
+            // Get current context information
             const codeContext = this._getCurrentCodeContext();
+            const hasSelectedText = codeContext?.selectedText !== undefined && codeContext.selectedText.length > 0;
             
-            // Create enhanced prompt with code context
-            const enhancedPrompt = codeContext 
-                ? `${userMessage}\n\nHere is my current code:\n\`\`\`${codeContext.language}\n${codeContext.code}\n\`\`\``
-                : userMessage;
+            console.log('🔍 CHAT DEBUG - Has selected text:', hasSelectedText);
+            
+            // Determine query type using smart context analyzer
+            const queryType = ContextAnalyzer.getQueryType(userMessage, hasSelectedText);
+            console.log('🔍 CHAT DEBUG - Query type:', queryType);
 
-            const response = await getDeepSeekResponse(enhancedPrompt);
-            this._sendResponse(response);
+            switch (queryType) {
+                case 'workspace':
+                    await this._handleWorkspaceQuery(userMessage);
+                    break;
+                case 'file-analysis':
+                case 'code-context':
+                    const enhancedMessage = codeContext?.code 
+                        ? `${userMessage}\n\nHere is my current code:\n\`\`\`${codeContext.language}\n${codeContext.code}\n\`\`\``
+                        : userMessage;
+                    const response = await getDeepSeekResponse(enhancedMessage);
+                    this._sendResponse(response);
+                    break;
+                case 'general':
+                default:
+                    const generalResponse = await getDeepSeekResponse(userMessage);
+                    this._sendResponse(generalResponse);
+                    break;
+            }
         } catch (error: any) {
-            this._sendResponse(`Error: ${error.message}`);
+            console.error('🔍 CHAT DEBUG - Error:', error);
+            this._sendResponse(`❌ **Error:** ${error.message}`);
         }
     }
 
-    private _getCurrentCodeContext(): { code: string; language: string } | null {
+    private async _handleWorkspaceQuery(userMessage: string): Promise<string> {
+        try {
+            if (userMessage.toLowerCase().includes('structure') || 
+                userMessage.toLowerCase().includes('summary') ||
+                userMessage.toLowerCase().includes('what files')) {
+                return await WorkspaceExplorer.getWorkspaceSummary();
+            }
+            
+            if (userMessage.toLowerCase().includes('find') || 
+                userMessage.toLowerCase().includes('search')) {
+                // Extract search term (simple implementation)
+                const searchTerm = userMessage.split(/find|search/i)[1]?.trim() || '';
+                if (searchTerm) {
+                    const results = await WorkspaceExplorer.findFiles(searchTerm);
+                    if (results.length === 0) {
+                        return `🔍 No files found matching "${searchTerm}"`;
+                    }
+                    
+                    let response = `🔍 **Found ${results.length} files matching "${searchTerm}":**\n\n`;
+                    results.slice(0, 10).forEach(file => {
+                        response += `📄 ${file.name} (${file.language || 'Unknown'}) - ${file.path}\n`;
+                    });
+                    
+                    if (results.length > 10) {
+                        response += `\n... and ${results.length - 10} more files`;
+                    }
+                    
+                    return response;
+                }
+            }
+            
+            // Default workspace response
+            return await WorkspaceExplorer.getWorkspaceSummary();
+        } catch (error) {
+            console.error('Error handling workspace query:', error);
+            return 'Sorry, I encountered an error while exploring your workspace.';
+        }
+    }
+
+    private _getCurrentCodeContext(): { code: string; language: string; selectedText: string } | null {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return null;
@@ -63,7 +126,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         const code = selectedText || document.getText();
         const language = document.languageId;
 
-        return { code, language };
+        return { code, language, selectedText };
     }
 
     private _sendCurrentCode() {
