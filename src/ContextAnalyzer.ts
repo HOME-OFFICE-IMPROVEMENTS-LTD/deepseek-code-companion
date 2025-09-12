@@ -22,7 +22,8 @@ export class ContextAnalyzer {
             'what can you see', 'what do you see', 'explore', 'structure',
             'what\'s in', 'contents', 'find file', 'search files',
             'package.json', 'package json', 'src directory', 'src folder',
-            'typescript files', '.ts files', 'ts files'
+            'typescript files', '.ts files', 'ts files',
+            'how many files', 'total files', 'file count', 'count files'
         ];
 
         const messageLower = userMessage.toLowerCase();

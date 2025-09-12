@@ -88,6 +88,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 return await this._getFileStructure();
             }
             
+            // Check for file count queries
+            if (lowerMessage.includes('how many files') || lowerMessage.includes('total files') || lowerMessage.includes('file count') || lowerMessage.includes('count files')) {
+                return await this._getFileCount();
+            }
+            
             // Check for src directory queries
             if (lowerMessage.includes('src directory') || lowerMessage.includes('files in src') || lowerMessage.includes('src folder')) {
                 return await this._getSrcDirectoryContents();
@@ -283,6 +288,48 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             case 'gif': 
             case 'svg': return '🖼️';
             default: return '📄';
+        }
+    }
+
+    private async _getFileCount(): Promise<string> {
+        try {
+            const allFiles = await vscode.workspace.findFiles('**/*', '**/node_modules/**', 1000);
+            const tsFiles = await vscode.workspace.findFiles('**/*.ts', '**/node_modules/**', 200);
+            const jsFiles = await vscode.workspace.findFiles('**/*.js', '**/node_modules/**', 200);
+            const jsonFiles = await vscode.workspace.findFiles('**/*.json', '**/node_modules/**', 50);
+            const srcFiles = await vscode.workspace.findFiles('src/**/*', '**/node_modules/**', 200);
+            
+            let response = "📊 **File Count Summary:**\n\n";
+            response += `📄 **Total files:** ${allFiles.length}${allFiles.length >= 1000 ? '+' : ''}\n`;
+            response += `🔷 **TypeScript files:** ${tsFiles.length}\n`;
+            response += `🟨 **JavaScript files:** ${jsFiles.length}\n`;
+            response += `📋 **JSON files:** ${jsonFiles.length}\n`;
+            response += `📁 **Files in src/:** ${srcFiles.length}\n\n`;
+            
+            // Add breakdown by directory
+            const filesByDir: { [key: string]: number } = {};
+            
+            allFiles.slice(0, 500).forEach(file => {  // Limit to prevent performance issues
+                const relativePath = vscode.workspace.asRelativePath(file);
+                const dir = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : '.';
+                filesByDir[dir] = (filesByDir[dir] || 0) + 1;
+            });
+            
+            const sortedDirs = Object.entries(filesByDir)
+                .sort(([,a], [,b]) => b - a)  // Sort by file count descending
+                .slice(0, 8);  // Top 8 directories
+            
+            if (sortedDirs.length > 0) {
+                response += "📁 **Top directories by file count:**\n";
+                sortedDirs.forEach(([dir, count]) => {
+                    const displayDir = dir === '.' ? 'Root' : dir;
+                    response += `   ${displayDir}: ${count} files\n`;
+                });
+            }
+            
+            return response;
+        } catch (error) {
+            return `❌ Error counting files: ${error}`;
         }
     }
 
