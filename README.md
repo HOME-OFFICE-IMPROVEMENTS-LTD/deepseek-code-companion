@@ -1,10 +1,14 @@
 # DeepSeek Code Companion
 
-Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.
+![Version](https://img.shields.io/badge/version-0.0.1-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
+![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)
 
-[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)](https://marketplace.visualstudio.com/items?itemName=Home%20%26%20Office%20Improvements.deepseek-code-companion)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.
+![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)
+
+Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.
 
 > 🚀 **Fast-Track Development**: See our [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md) for detailed feature development plans
 
@@ -13,7 +17,7 @@ Your official AI partner in VS Code. Chat with DeepSeek and other models, genera
 | Phase | Status | Features | Timeline |
 |-------|--------|----------|----------|
 | **Foundation** | ✅ **Complete** | Chat interface, workspace analysis | ✅ Done |
-| **Phase 1** | 🔄 **In Progress** | OpenRouter integration, multi-model support, cost tracking | Week 1 |
+| **Phase 1** | ✅ **Complete** | OpenRouter integration, multi-model support, cost tracking | ✅ Done |
 | **Phase 2** | ⏳ **Planned** | Security scanning, code analysis, performance metrics | Week 2 |
 | **Phase 3** | ⏳ **Planned** | Documentation generation, test creation, metrics dashboard | Week 3 |
 | **Marketplace** | 🎯 **Target** | Professional listing, branding, community features | Week 2 |
@@ -29,10 +33,12 @@ Your official AI partner in VS Code. Chat with DeepSeek and other models, genera
 - 🔄 **Smart Refactoring**: Get intelligent code refactoring suggestions
 - 📊 **Project Insights**: File structure analysis, TypeScript detection, and statistics
 - 🎯 **Context-Aware**: Understands your project structure for better responses
+- 🔗 **Multi-Model Support**: OpenRouter integration with 100+ AI models (GPT-4, Claude, Llama, etc.)
+- 💰 **Cost Tracking**: Real-time API usage and cost monitoring with daily limits
+- 🎛️ **Model Selection**: Choose from DeepSeek, OpenAI, Anthropic, Meta, and more
+- ⚡ **Smart Context**: Automatic workspace context for greetings and queries
 
 ### **🚀 Coming Soon** 
-- 🔗 **Multi-Model Support**: OpenRouter integration with 100+ AI models
-- 💰 **Cost Tracking**: Real-time API usage and cost monitoring
 - 🔒 **Security Scanner**: OWASP compliance and vulnerability detection
 - 📈 **Real-time Metrics**: Code quality, performance, and maintainability scores
 - 🧪 **Test Generation**: Intelligent unit and integration test creation
@@ -42,22 +48,32 @@ Your official AI partner in VS Code. Chat with DeepSeek and other models, genera
 
 ### Installation
 1. Install the extension from the VS Code Marketplace
-2. Get your API key from [DeepSeek Platform](https://platform.deepseek.com/)
-3. Configure your API key in VS Code settings
+2. Get your DeepSeek API key from [DeepSeek Platform](https://platform.deepseek.com/)
+3. (Optional) Get your OpenRouter API key from [OpenRouter](https://openrouter.ai/) for access to 100+ models
+4. Configure your API keys in VS Code settings
 
 ### Configuration
 1. Open VS Code Settings (`Ctrl+,` or `Cmd+,`)
-2. Search for "DeepSeek"
-3. Enter your API key in `deepSeek.apiKey`
+2. Search for "DeepSeek Code Companion"
+3. Configure the following settings:
+   - **DeepSeek API Key**: Your DeepSeek API key (required)
+   - **OpenRouter API Key**: Your OpenRouter API key (optional, for multi-model access)
+   - **Default Model**: Choose your preferred model (default: `deepseek-chat`)
+   - **Daily Cost Limit**: Set spending limit to prevent overage (default: $5.00)
+   - **Auto Switch to DeepSeek**: Auto-switch to DeepSeek for code queries (default: true)
+   - **Show Cost in Chat**: Display usage costs in chat interface (default: true)
 
 ### Usage
 1. Click the DeepSeek icon in the Activity Bar
-2. Start chatting with AI in the sidebar
-3. Ask questions like:
+2. Select your preferred AI model from the dropdown
+3. Start chatting with AI in the sidebar
+4. Monitor your daily usage and costs in real-time
+5. Ask questions like:
    - "Show me the file structure"
    - "How many TypeScript files are in this project?"
    - "Generate a React component"
    - "Refactor this function"
+   - "Hi" (for workspace-aware greeting)
 
 ## 🎯 Supported Queries
 
@@ -100,7 +116,12 @@ npm run package
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `deepSeek.apiKey` | string | `""` | Your DeepSeek API key |
+| `deepseekCodeCompanion.deepseekApiKey` | string | `""` | Your DeepSeek API key for accessing DeepSeek models |
+| `deepseekCodeCompanion.openrouterApiKey` | string | `""` | Your OpenRouter API key for accessing 100+ AI models (optional) |
+| `deepseekCodeCompanion.defaultModel` | string | `"deepseek-chat"` | Default model to use for new conversations |
+| `deepseekCodeCompanion.dailyCostLimit` | number | `5.0` | Daily API cost limit in USD to prevent accidental overspending |
+| `deepseekCodeCompanion.autoSwitchToDeepSeek` | boolean | `true` | Automatically switch to DeepSeek models for code-related queries |
+| `deepseekCodeCompanion.showCostInChat` | boolean | `true` | Display API usage cost in chat interface |
 
 ## 🤝 Contributing
 

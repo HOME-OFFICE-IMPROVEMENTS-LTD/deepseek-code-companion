@@ -20,6 +20,9 @@ export class ModelManager {
         const deepseekApiKey = config.get<string>('deepseekApiKey');
         if (deepseekApiKey) {
             this.providers.set('deepseek', new DeepSeekProvider({ apiKey: deepseekApiKey }));
+            console.log('✅ DeepSeek provider initialized');
+        } else {
+            console.log('⚠️ DeepSeek API key not configured - DeepSeek models will not be available');
         }
 
         // Initialize OpenRouter provider
@@ -65,7 +68,11 @@ export class ModelManager {
         const models = await this.getAllAvailableModels();
         const model = models.find(m => m.id === modelId);
         if (!model) {
-            throw new Error(`Model ${modelId} not found`);
+            if (models.length === 0) {
+                throw new Error(`No AI models available. Please configure your API keys in VS Code settings:\n• DeepSeek API Key: Get from https://platform.deepseek.com/\n• OpenRouter API Key: Get from https://openrouter.ai/ (optional)`);
+            }
+            const availableModels = models.map(m => m.id).join(', ');
+            throw new Error(`Model "${modelId}" not found. Available models: ${availableModels}`);
         }
 
         const provider = this.providers.get(model.provider);
