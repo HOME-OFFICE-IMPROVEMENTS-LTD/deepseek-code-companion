@@ -24,7 +24,15 @@ export class ContextAnalyzer {
         ];
 
         const messageLower = userMessage.toLowerCase();
-        return workspaceKeywords.some(keyword => messageLower.includes(keyword));
+        console.log('🔍 WORKSPACE DEBUG - Message:', `"${messageLower}"`);
+        
+        const matches = workspaceKeywords.filter(keyword => messageLower.includes(keyword));
+        console.log('🔍 WORKSPACE DEBUG - Matching keywords:', matches);
+        
+        const isWorkspace = workspaceKeywords.some(keyword => messageLower.includes(keyword));
+        console.log('🔍 WORKSPACE DEBUG - Is workspace query:', isWorkspace);
+        
+        return isWorkspace;
     }
 
     /**
