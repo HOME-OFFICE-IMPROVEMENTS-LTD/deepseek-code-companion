@@ -6,14 +6,37 @@ Your official AI partner in VS Code. Chat with DeepSeek and other models, genera
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
+> 🚀 **Fast-Track Development**: See our [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md) for detailed feature development plans
+
+## 🎯 **Current Status & Roadmap**
+
+| Phase | Status | Features | Timeline |
+|-------|--------|----------|----------|
+| **Foundation** | ✅ **Complete** | Chat interface, workspace analysis | ✅ Done |
+| **Phase 1** | 🔄 **In Progress** | OpenRouter integration, multi-model support, cost tracking | Week 1 |
+| **Phase 2** | ⏳ **Planned** | Security scanning, code analysis, performance metrics | Week 2 |
+| **Phase 3** | ⏳ **Planned** | Documentation generation, test creation, metrics dashboard | Week 3 |
+| **Marketplace** | 🎯 **Target** | Professional listing, branding, community features | Week 2 |
+
+📋 **[View Complete Roadmap →](IMPLEMENTATION_ROADMAP.md)**
+
 ## ✨ Features
 
+### **🎉 Current Features**
 - 💬 **AI Chat Interface**: Chat with DeepSeek AI directly in VS Code's sidebar
 - 🔍 **Workspace Intelligence**: Smart file exploration and project analysis
 - 🛠️ **Code Generation**: AI-powered code snippets and explanations
 - 🔄 **Smart Refactoring**: Get intelligent code refactoring suggestions
 - 📊 **Project Insights**: File structure analysis, TypeScript detection, and statistics
 - 🎯 **Context-Aware**: Understands your project structure for better responses
+
+### **🚀 Coming Soon** 
+- 🔗 **Multi-Model Support**: OpenRouter integration with 100+ AI models
+- 💰 **Cost Tracking**: Real-time API usage and cost monitoring
+- 🔒 **Security Scanner**: OWASP compliance and vulnerability detection
+- 📈 **Real-time Metrics**: Code quality, performance, and maintainability scores
+- 🧪 **Test Generation**: Intelligent unit and integration test creation
+- 📚 **Auto Documentation**: API docs, README, and architecture generation
 
 ## 🚀 Quick Start
 
