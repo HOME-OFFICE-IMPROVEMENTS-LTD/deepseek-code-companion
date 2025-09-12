@@ -532,7 +532,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             'project', 'workspace', 'code', 'readme', 'package.json',
             'what can you see', 'what do you see', 'access', 'read',
             'my project', 'this project', 'current project',
-            'analyze', 'review', 'explain', 'help with'
+            'analyze', 'review', 'explain', 'help with',
+            // Add greeting keywords so OpenRouter models get workspace context
+            'hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon',
+            'what can you do', 'help me', 'who are you', 'what are you'
         ];
 
         const lowerMessage = userMessage.toLowerCase();
