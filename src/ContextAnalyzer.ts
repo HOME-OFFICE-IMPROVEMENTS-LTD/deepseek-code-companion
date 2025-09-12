@@ -119,9 +119,9 @@ export class ContextAnalyzer {
             return 'code-context';
         }
 
-        // For greetings and general queries, provide workspace context ONLY for DeepSeek models
-        // Other models should handle greetings normally
-        if (this.isGreetingOrGeneral(userMessage) && modelId?.startsWith('deepseek')) {
+        // For greetings and general queries, provide workspace context for ALL models
+        // This ensures consistent workspace-aware behavior across all AI providers
+        if (this.isGreetingOrGeneral(userMessage)) {
             return 'workspace';
         }
 
