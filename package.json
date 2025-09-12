@@ -1,0 +1,161 @@
+{
+  "name": "deepseek-code-companion",
+  "displayName": "DeepSeek Code Companion",
+  "description": "Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.",
+  "version": "0.1.0",
+  "publisher": "home-office-improvements-ltd",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion/issues"
+  },
+  "homepage": "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion#readme",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "Snippets"
+  ],
+  "keywords": [
+    "AI",
+    "DeepSeek",
+    "code generation",
+    "refactoring",
+    "chat",
+    "assistant"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "deepseek.openChat",
+        "title": "Open DeepSeek Chat",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.analyzeWorkspace",
+        "title": "Analyze Workspace",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.generateCode",
+        "title": "Generate Code",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.generateFromComment",
+        "title": "Generate Code from Comment",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.refactorCode",
+        "title": "Refactor Code",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.quickFix",
+        "title": "Quick Fix",
+        "category": "DeepSeek"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "deepseek.generateCode",
+          "group": "deepseek@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "deepseek.generateFromComment",
+          "group": "deepseek@2",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "deepseek.refactorCode",
+          "group": "deepseek@3",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "deepseek.quickFix",
+          "group": "deepseek@4",
+          "when": "editorHasSelection"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "deepseek.analyzeWorkspace",
+          "group": "deepseek@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DeepSeek Code Companion",
+      "properties": {
+        "deepseek.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "DeepSeek API key for authentication",
+          "scope": "application"
+        },
+        "deepseek.baseUrl": {
+          "type": "string",
+          "default": "https://api.deepseek.com",
+          "description": "DeepSeek API base URL",
+          "scope": "application"
+        },
+        "deepseek.model": {
+          "type": "string",
+          "default": "deepseek-coder",
+          "description": "DeepSeek model to use for code generation",
+          "enum": [
+            "deepseek-coder",
+            "deepseek-chat"
+          ]
+        },
+        "deepseek.maxTokens": {
+          "type": "number",
+          "default": 4000,
+          "description": "Maximum tokens for API responses",
+          "minimum": 100,
+          "maximum": 8000
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --mode production",
+    "compile-dev": "webpack --mode development",
+    "watch": "webpack --mode development --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "18.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.0.0",
+    "ts-loader": "^9.4.3",
+    "typescript": "^5.1.3",
+    "webpack": "^5.85.0",
+    "webpack-cli": "^5.1.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "marked": "^9.0.0"
+  }
+}
