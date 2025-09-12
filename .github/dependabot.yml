@@ -1,0 +1,46 @@
+version: 2
+updates:
+  # NPM dependencies only
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "HOME-OFFICE-IMPROVEMENTS-LTD"
+    assignees:
+      - "HOME-OFFICE-IMPROVEMENTS-LTD"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    target-branch: "main"
+    groups:
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+      webpack:
+        patterns:
+          - "webpack*"
+          - "*-loader"
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+      vscode:
+        patterns:
+          - "@types/vscode"
+          - "@vscode/*"
+      testing:
+        patterns:
+          - "@types/mocha"
+          - "mocha"
+          - "*test*"
