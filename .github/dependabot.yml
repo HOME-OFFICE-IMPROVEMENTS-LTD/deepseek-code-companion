@@ -1,9 +1,6 @@
-# Dependabot configuration for DeepSeek Code Companion
-# Documentation: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  # NPM dependencies
+  # NPM dependencies only
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -24,7 +21,6 @@ updates:
       - "dependencies"
       - "automated"
     target-branch: "main"
-    # Group related updates
     groups:
       typescript:
         patterns:
@@ -48,19 +44,3 @@ updates:
           - "@types/mocha"
           - "mocha"
           - "*test*"
-
-  # GitHub Actions (if you add workflows later)
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "ci"
-      include: "scope"
-    labels:
-      - "ci/cd"
-      - "automated"
