@@ -1,4 +1,5 @@
 import { ModelConfig, ChatMessage, ModelResponse, ProviderConfig } from './types';
+import { ErrorHandler } from './ErrorHandler';
 
 export abstract class BaseModelProvider {
     protected config: ProviderConfig;
@@ -28,7 +29,7 @@ export abstract class BaseModelProvider {
 }
 
 export class DeepSeekProvider extends BaseModelProvider {
-    private static readonly MODELS: ModelConfig[] = [
+    public static readonly MODELS: ModelConfig[] = [
         {
             id: 'deepseek-chat',
             name: 'DeepSeek Chat',
@@ -65,23 +66,26 @@ export class DeepSeekProvider extends BaseModelProvider {
             throw new Error(`Model ${modelId} not found`);
         }
 
-        try {
+        return await ErrorHandler.withRetry(async () => {
+            const requestBody = {
+                model: modelId,
+                messages: messages.map(m => ({ role: m.role, content: m.content })),
+                max_tokens: options.maxTokens || model.maxTokens,
+                temperature: options.temperature || 0.7
+            };
+            
             const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${this.config.apiKey}`
                 },
-                body: JSON.stringify({
-                    model: modelId,
-                    messages: messages.map(m => ({ role: m.role, content: m.content })),
-                    max_tokens: options.maxTokens || model.maxTokens,
-                    temperature: options.temperature || 0.7
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
-                throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
+                const errorData = await response.text();
+                throw new Error(`DeepSeek API error: ${response.status} ${response.statusText} - ${errorData}`);
             }
 
             const data = await response.json() as any;
@@ -98,9 +102,7 @@ export class DeepSeekProvider extends BaseModelProvider {
                 model: modelId,
                 provider: 'deepseek'
             };
-        } catch (error) {
-            throw new Error(`DeepSeek request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
+        }, `DeepSeek API Call: ${modelId}`);
     }
 }
 
@@ -112,9 +114,13 @@ export class OpenRouterProvider extends BaseModelProvider {
     async getAvailableModels(): Promise<ModelConfig[]> {
         const now = Date.now();
         if (this.cachedModels.length > 0 && now - this.lastModelFetch < this.CACHE_DURATION) {
+            console.log('🔍 Using cached OpenRouter models');
             return this.cachedModels;
         }
 
+        console.log('🔍 Fetching fresh OpenRouter models...');
+        console.log('🔍 API key configured:', !!this.config.apiKey);
+        
         try {
             const response = await fetch('https://openrouter.ai/api/v1/models', {
                 headers: {
@@ -124,11 +130,17 @@ export class OpenRouterProvider extends BaseModelProvider {
                 }
             });
 
+            console.log('🔍 OpenRouter API response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error(`OpenRouter API error: ${response.status}`);
+                const errorText = await response.text();
+                console.error('🔍 OpenRouter API error response:', errorText);
+                throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
             }
 
             const data = await response.json() as any;
+            console.log('🔍 OpenRouter API returned data:', data.data ? `${data.data.length} models` : 'No data.data field');
+            
             this.cachedModels = data.data.map((model: any) => ({
                 id: model.id,
                 name: model.name,
@@ -142,11 +154,13 @@ export class OpenRouterProvider extends BaseModelProvider {
             }));
 
             this.lastModelFetch = now;
+            console.log(`✅ Successfully cached ${this.cachedModels.length} OpenRouter models`);
             return this.cachedModels;
         } catch (error) {
+            console.error('❌ OpenRouter fetch error:', error);
             // Return cached models if available, otherwise empty array
             if (this.cachedModels.length > 0) {
-                console.warn('Using cached OpenRouter models due to API error:', error);
+                console.warn('⚠️ Using cached OpenRouter models due to API error:', error);
                 return this.cachedModels;
             }
             throw new Error(`Failed to fetch OpenRouter models: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -168,7 +182,7 @@ export class OpenRouterProvider extends BaseModelProvider {
             throw new Error(`Model ${modelId} not found in OpenRouter`);
         }
 
-        try {
+        return await ErrorHandler.withRetry(async () => {
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -204,9 +218,7 @@ export class OpenRouterProvider extends BaseModelProvider {
                 model: modelId,
                 provider: 'openrouter'
             };
-        } catch (error) {
-            throw new Error(`OpenRouter request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
+        }, `OpenRouter API Call: ${modelId}`);
     }
 
     private inferCapabilities(modelId: string, modelName: string): string[] {

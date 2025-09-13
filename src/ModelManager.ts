@@ -1,6 +1,10 @@
 import * as vscode from 'vscode';
 import { BaseModelProvider, DeepSeekProvider, OpenRouterProvider } from './ModelProvider';
 import { ModelConfig, ChatMessage, ModelResponse, CostTracker } from './types';
+import { responseOptimizer } from './ResponseOptimizer';
+import { modelQualityTracker } from './ModelQualityTracker';
+import { smartContextManager } from './SmartContextManager';
+import { uiPolishManager } from './UIPolishManager';
 
 export class ModelManager {
     private providers: Map<string, BaseModelProvider> = new Map();
@@ -27,21 +31,32 @@ export class ModelManager {
 
         // Initialize OpenRouter provider
         const openrouterApiKey = config.get<string>('openrouterApiKey');
+        console.log('🔍 OpenRouter API key configured:', !!openrouterApiKey);
         if (openrouterApiKey) {
+            console.log('🔍 OpenRouter API key length:', openrouterApiKey.length);
             this.providers.set('openrouter', new OpenRouterProvider({ apiKey: openrouterApiKey }));
+            console.log('✅ OpenRouter provider initialized');
+        } else {
+            console.log('⚠️ OpenRouter API key not configured - OpenRouter models will not be available');
         }
     }
 
     async getAllAvailableModels(): Promise<ModelConfig[]> {
         const allModels: ModelConfig[] = [];
         
+        console.log('🔍 Available providers:', Array.from(this.providers.keys()));
+        
         for (const [providerName, provider] of this.providers) {
             try {
+                console.log(`🔍 Fetching models from ${providerName}...`);
                 const models = await provider.getAvailableModels();
+                console.log(`✅ Got ${models.length} models from ${providerName}`);
                 allModels.push(...models);
             } catch (error) {
-                console.warn(`Failed to get models from ${providerName}:`, error);
-                vscode.window.showWarningMessage(`Failed to load models from ${providerName}`);
+                console.error(`❌ Failed to get models from ${providerName}:`, error);
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                console.error(`❌ Error details: ${errorMessage}`);
+                vscode.window.showWarningMessage(`Failed to load models from ${providerName}: ${errorMessage}`);
             }
         }
 
@@ -59,12 +74,14 @@ export class ModelManager {
         modelId: string, 
         options?: { maxTokens?: number; temperature?: number }
     ): Promise<ModelResponse> {
+        const startTime = Date.now();
+        
         // Check daily cost limit
         if (this.costTracker.dailyUsage >= this.costTracker.dailyLimit) {
             throw new Error(`Daily cost limit of $${this.costTracker.dailyLimit.toFixed(2)} reached. Usage will reset at midnight.`);
         }
 
-        // Find the appropriate provider
+        // Find the appropriate provider and model
         const models = await this.getAllAvailableModels();
         const model = models.find(m => m.id === modelId);
         if (!model) {
@@ -81,19 +98,262 @@ export class ModelManager {
         }
 
         try {
-            const response = await provider.sendMessage(messages, modelId, options);
+            // Show typing indicator
+            uiPolishManager.showTypingIndicator(model.name);
+
+            // Optimize context for this model and conversation
+            const taskType = this.detectTaskType(messages);
+            console.log('🔍 MODEL MANAGER - Before context optimization, message count:', messages.length);
+            console.log('🔍 MODEL MANAGER - Messages contain README:', messages.some(m => m.content.includes('[SYSTEM: Here is the README.md content for context:]')));
             
+            const contextResult = await smartContextManager.optimizeContext(
+                messages, 
+                model, 
+                taskType
+            );
+            
+            console.log('🔍 MODEL MANAGER - After context optimization, message count:', contextResult.optimizedMessages.length);
+            console.log('🔍 MODEL MANAGER - Optimized messages contain README:', contextResult.optimizedMessages.some(m => m.content.includes('[SYSTEM: Here is the README.md content for context:]')));
+            console.log('🔍 MODEL MANAGER - Context summary:', contextResult.contextSummary);
+
+            // Use optimized response system with retry and caching
+            const response = await responseOptimizer.optimizeResponse(
+                async () => {
+                    return await provider.sendMessage(
+                        contextResult.optimizedMessages, 
+                        modelId, 
+                        options
+                    );
+                },
+                contextResult.optimizedMessages,
+                modelId,
+                options
+            );
+
+            const responseTime = Date.now() - startTime;
+
+            // Track quality and performance
+            await modelQualityTracker.evaluateResponse(
+                modelId,
+                response,
+                messages,
+                responseTime,
+                taskType
+            );
+
             // Update cost tracking
             this.updateCostTracker(response.usage.totalCost);
             
-            return response;
+            // Update cost efficiency in quality tracker
+            modelQualityTracker.updateCostEfficiency(
+                modelId,
+                70, // Base quality score, will be improved by actual evaluation
+                response.usage.totalCost
+            );
+
+            // Clear typing indicator
+            uiPolishManager.clearTypingIndicator();
+
+            // Add processing metadata
+            const enhancedResponse: ModelResponse = {
+                ...response,
+                metadata: {
+                    ...response.metadata,
+                    processingTime: responseTime,
+                    contextOptimized: contextResult.compressionApplied,
+                    contextSummary: contextResult.contextSummary,
+                    tokensUsed: contextResult.tokensUsed,
+                    taskType
+                }
+            };
+
+            return enhancedResponse;
         } catch (error) {
+            // Clear typing indicator on error
+            uiPolishManager.clearTypingIndicator();
+            
+            // Track error for quality assessment
+            await modelQualityTracker.evaluateResponse(
+                modelId,
+                {
+                    content: '',
+                    usage: { inputTokens: 0, outputTokens: 0, totalCost: 0 },
+                    model: modelId,
+                    provider: model.provider
+                },
+                messages,
+                Date.now() - startTime,
+                this.detectTaskType(messages)
+            );
+
+            // Show enhanced error with recovery options
+            await uiPolishManager.showEnhancedError(
+                error instanceof Error ? error : new Error('Unknown error'),
+                `${model.name} request`,
+                [
+                    {
+                        title: 'Try Different Model',
+                        action: async () => {
+                            const recommendedModel = modelQualityTracker.recommendModel(
+                                models,
+                                this.detectTaskType(messages)
+                            );
+                            if (recommendedModel) {
+                                uiPolishManager.updateStatus({
+                                    message: `Switched to ${recommendedModel.name}`,
+                                    icon: '$(arrow-swap)'
+                                });
+                            }
+                        }
+                    },
+                    {
+                        title: 'Check Settings',
+                        action: async () => {
+                            vscode.commands.executeCommand('workbench.action.openSettings', 'deepseekCodeCompanion');
+                        }
+                    }
+                ]
+            );
+
             throw new Error(`Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
+    /**
+     * Detects the type of task based on the conversation
+     */
+    private detectTaskType(messages: ChatMessage[]): 'coding' | 'general' | 'analysis' | 'creative' {
+        const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content.toLowerCase() || '';
+        
+        const codeKeywords = ['code', 'function', 'class', 'method', 'variable', 'debug', 'error', 'fix', 'implement', 'algorithm', 'syntax'];
+        const analysisKeywords = ['analyze', 'review', 'explain', 'compare', 'evaluate', 'assess', 'examine'];
+        const creativeKeywords = ['create', 'generate', 'write', 'design', 'story', 'content', 'creative'];
+
+        const codeScore = codeKeywords.filter(word => lastUserMessage.includes(word)).length;
+        const analysisScore = analysisKeywords.filter(word => lastUserMessage.includes(word)).length;
+        const creativeScore = creativeKeywords.filter(word => lastUserMessage.includes(word)).length;
+
+        if (codeScore > analysisScore && codeScore > creativeScore) {
+            return 'coding';
+        } else if (analysisScore > creativeScore) {
+            return 'analysis';
+        } else if (creativeScore > 0) {
+            return 'creative';
+        }
+
+        return 'general';
+    }
+
     getCostTracker(): CostTracker {
         return { ...this.costTracker };
+    }
+
+    /**
+     * Gets model recommendations based on task type and quality scores
+     */
+    async getModelRecommendations(
+        taskType: 'coding' | 'general' | 'analysis' | 'creative' = 'general',
+        prioritizeCost = false
+    ): Promise<ModelConfig[]> {
+        const models = await this.getAllAvailableModels();
+        
+        // Use quality tracker for recommendations
+        const recommended = modelQualityTracker.recommendModel(models, taskType, prioritizeCost);
+        if (recommended) {
+            // Move recommended model to front
+            const otherModels = models.filter(m => m.id !== recommended.id);
+            return [recommended, ...otherModels];
+        }
+        
+        return models;
+    }
+
+    /**
+     * Gets optimization metrics and performance statistics
+     */
+    getPerformanceMetrics(): {
+        responseOptimizer: any;
+        qualityTracker: any;
+        contextManager: any;
+    } {
+        return {
+            responseOptimizer: responseOptimizer.getMetrics(),
+            qualityTracker: modelQualityTracker.getStats(),
+            contextManager: smartContextManager.getStats()
+        };
+    }
+
+    /**
+     * Shows comprehensive usage statistics
+     */
+    async showUsageStatistics(): Promise<void> {
+        const metrics = this.getPerformanceMetrics();
+        const costTracker = this.getCostTracker();
+        
+        await uiPolishManager.showUsageStats({
+            totalRequests: metrics.qualityTracker.totalEvaluations,
+            totalCost: costTracker.totalUsage,
+            modelUsage: {},
+            dailyUsage: [costTracker.dailyUsage],
+            metrics: metrics.responseOptimizer
+        });
+    }
+
+    /**
+     * Provides smart suggestions for improving workflow
+     */
+    async showSmartSuggestions(): Promise<void> {
+        const suggestions = [];
+        const metrics = this.getPerformanceMetrics();
+        const models = await this.getAllAvailableModels();
+
+        // Suggest model upgrades based on quality scores
+        if (metrics.qualityTracker.topModels.length > 1) {
+            const topModel = metrics.qualityTracker.topModels[0];
+            suggestions.push({
+                title: 'Consider using higher-rated model',
+                description: `${topModel.modelId} has a quality score of ${topModel.score.toFixed(1)}`,
+                priority: 'medium' as const
+            });
+        }
+
+        // Suggest cost optimization
+        if (this.costTracker.dailyUsage > this.costTracker.dailyLimit * 0.7) {
+            suggestions.push({
+                title: 'Optimize API usage',
+                description: 'Consider using less expensive models or enabling more aggressive caching',
+                priority: 'high' as const,
+                action: () => {
+                    vscode.commands.executeCommand('workbench.action.openSettings', 'deepseekCodeCompanion');
+                }
+            });
+        }
+
+        // Suggest context optimization
+        if (metrics.contextManager.totalTokens > 10000) {
+            suggestions.push({
+                title: 'Context optimization available',
+                description: 'Large context detected. Enable compression to reduce costs',
+                priority: 'medium' as const
+            });
+        }
+
+        await uiPolishManager.showSmartSuggestions(suggestions);
+    }
+
+    /**
+     * Resets all optimization systems
+     */
+    resetOptimizations(): void {
+        responseOptimizer.reset();
+        modelQualityTracker.reset();
+        smartContextManager.reset();
+        
+        uiPolishManager.showNotification({
+            type: 'info',
+            title: 'Optimizations Reset',
+            detail: 'All caches and quality tracking data have been cleared'
+        });
     }
 
     resetDailyCost(): void {
@@ -106,6 +366,49 @@ export class ModelManager {
     updateDailyLimit(newLimit: number): void {
         this.costTracker.dailyLimit = newLimit;
         this.saveCostTracker();
+    }
+
+    /**
+     * Gets the status of all providers
+     */
+    getProviderStatus(): Array<{
+        provider: string;
+        configured: boolean;
+        available: boolean;
+        modelCount?: number;
+    }> {
+        const status = [];
+        const config = vscode.workspace.getConfiguration('deepseekCodeCompanion');
+        
+        // Check DeepSeek
+        const deepseekProvider = this.providers.get('deepseek');
+        const deepseekApiKey = config.get<string>('deepseekApiKey');
+        status.push({
+            provider: 'deepseek',
+            configured: !!deepseekApiKey,
+            available: !!deepseekProvider,
+            modelCount: deepseekProvider ? DeepSeekProvider.MODELS.length : 0
+        });
+
+        // Check OpenRouter
+        const openrouterProvider = this.providers.get('openrouter');
+        const openrouterApiKey = config.get<string>('openrouterApiKey');
+        status.push({
+            provider: 'openrouter',
+            configured: !!openrouterApiKey,
+            available: !!openrouterProvider,
+            modelCount: 0 // Will be populated when models are fetched
+        });
+
+        return status;
+    }
+
+    /**
+     * Refreshes provider configurations
+     */
+    refreshProviders(): void {
+        this.providers.clear();
+        this.initializeProviders();
     }
 
     private updateCostTracker(cost: number): void {
@@ -157,30 +460,5 @@ export class ModelManager {
 
     private saveCostTracker(): void {
         this.context.globalState.update('costTracker', this.costTracker);
-    }
-
-    refreshProviders(): void {
-        this.providers.clear();
-        this.initializeProviders();
-    }
-
-    getProviderStatus(): { provider: string; configured: boolean; modelsAvailable: boolean }[] {
-        const status: { provider: string; configured: boolean; modelsAvailable: boolean }[] = [];
-        
-        const config = vscode.workspace.getConfiguration('deepseekCodeCompanion');
-        
-        status.push({
-            provider: 'deepseek',
-            configured: !!config.get<string>('deepseekApiKey'),
-            modelsAvailable: this.providers.has('deepseek')
-        });
-
-        status.push({
-            provider: 'openrouter',
-            configured: !!config.get<string>('openrouterApiKey'),
-            modelsAvailable: this.providers.has('openrouter')
-        });
-
-        return status;
     }
 }

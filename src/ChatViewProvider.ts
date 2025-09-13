@@ -106,32 +106,53 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async _handleChatMessage(userMessage: string, selectedModel?: string) {
-        console.log('🔍 CHAT DEBUG - Handling message:', userMessage);
-        
         try {
+                        // BULLETPROOF FIX: Inject README content for ALL models IMMEDIATELY
+            let enhancedUserMessage = userMessage;
+            if (userMessage.toLowerCase().includes('readme')) {
+                console.log('🔍 BULLETPROOF FIX - README injection triggered for message:', userMessage);
+                try {
+                    const readmeFiles = await vscode.workspace.findFiles('**/README.md', '**/node_modules/**', 1);
+                    console.log('🔍 BULLETPROOF FIX - Found README files:', readmeFiles.length);
+                    if (readmeFiles.length > 0) {
+                        const content = await vscode.workspace.fs.readFile(readmeFiles[0]);
+                        const contentString = new TextDecoder().decode(content);
+                        console.log('🔍 BULLETPROOF FIX - README content length:', contentString.length);
+                        // LIMIT README SIZE to prevent API errors
+                        const limitedContent = contentString.substring(0, 2000); // Limit to 2KB
+                        enhancedUserMessage = `${userMessage}\n\n[SYSTEM: Here is the README.md content for context:]\n${limitedContent}`;
+                        console.log('🔍 BULLETPROOF FIX - Enhanced message created, total length:', enhancedUserMessage.length);
+                        console.log('🔍 BULLETPROOF FIX - Enhanced message preview:', enhancedUserMessage.substring(0, 200) + '...');
+                    }
+                } catch (error) {
+                    console.error('Error reading README for injection:', error);
+                }
+            }
+            
             // Determine the model to use
             const config = vscode.workspace.getConfiguration('deepseekCodeCompanion');
             const defaultModel = config.get<string>('defaultModel') || 'deepseek-chat';
             const modelToUse = selectedModel || defaultModel;
-            
-            // Add user message to conversation history
+
+            // Add user message to conversation history (use enhanced message for README requests)
             const userChatMessage: ChatMessage = {
                 role: 'user',
-                content: userMessage,
+                content: enhancedUserMessage, // Use enhanced message to preserve README content
                 timestamp: new Date()
             };
-            this.conversationHistory.push(userChatMessage);
-            
-            // Get current context information
+            this.conversationHistory.push(userChatMessage);            // Get current context information
             const codeContext = this._getCurrentCodeContext();
             const hasSelectedText = codeContext?.selectedText !== undefined && codeContext.selectedText.length > 0;
-            
-            console.log('🔍 CHAT DEBUG - Has selected text:', hasSelectedText);
-            console.log('🔍 CHAT DEBUG - Using model:', modelToUse);
-            
+
             // Determine query type using smart context analyzer
             const queryType = ContextAnalyzer.getQueryType(userMessage, hasSelectedText, modelToUse);
-            console.log('🔍 CHAT DEBUG - Query type:', queryType);
+            
+            // Debug logging for README requests
+            if (userMessage.toLowerCase().includes('readme')) {
+                console.log('🔍 CHAT HANDLER - README request detected');
+                console.log('🔍 CHAT HANDLER - Query type:', queryType);
+                console.log('🔍 CHAT HANDLER - Model:', modelToUse);
+            }
 
             let responseContent: string;
 
@@ -169,37 +190,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'general':
                 default:
-                    // For non-DeepSeek models, add workspace context to help them understand the environment
-                    let enhancedMessages = [...this.conversationHistory];
+                    // UNIVERSAL WORKSPACE FIX: Messages already contain enhanced content
+                    const messagesForAPI = [...this.conversationHistory];
+                    console.log('🔍 README INJECTION - Enhanced message length for model:', modelToUse, messagesForAPI[messagesForAPI.length - 1].content.length);
                     
-                    // Add workspace context for non-DeepSeek models when relevant
-                    if (!modelToUse.startsWith('deepseek')) {
-                        let additionalContext = '';
-                        
-                        // Check for specific file requests
-                        const fileContent = await this._getFileContentForAI(userMessage);
-                        if (fileContent) {
-                            additionalContext += fileContent + '\n\n';
-                        }
-                        
-                        // Add general workspace context if relevant
-                        const workspaceContext = await this._getWorkspaceContextForAI();
-                        if (workspaceContext && this._shouldIncludeWorkspaceContext(userMessage)) {
-                            additionalContext += workspaceContext;
-                        }
-                        
-                        // Enhance the message if we have context to add
-                        if (additionalContext) {
-                            const lastMessage = enhancedMessages[enhancedMessages.length - 1];
-                            const enhancedContent = `${lastMessage.content}\n\n${additionalContext}`;
-                            enhancedMessages[enhancedMessages.length - 1] = {
-                                ...lastMessage,
-                                content: enhancedContent
-                            };
-                        }
-                    }
-                    
-                    const generalResponse = await this.modelManager.sendMessage(enhancedMessages, modelToUse);
+                    const generalResponse = await this.modelManager.sendMessage(messagesForAPI, modelToUse);
                     responseContent = generalResponse.content;
                     
                     // Add assistant response to conversation history
@@ -218,7 +213,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             this._sendCostInfo();
             
         } catch (error: any) {
-            console.error('🔍 CHAT DEBUG - Error:', error);
             this._sendResponse(`❌ **Error:** ${error.message}`);
         }
     }
@@ -294,6 +288,28 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             // Check for package.json queries
             if (lowerMessage.includes('package.json') || lowerMessage.includes('package json')) {
                 return await this._findPackageJson();
+            }
+            
+            // Check for README queries
+            if (lowerMessage.includes('readme') || lowerMessage.includes('read me') || 
+                lowerMessage.includes('access my readme') || lowerMessage.includes('my readme')) {
+                try {
+                    const readmeFiles = await vscode.workspace.findFiles('**/README.md', '**/node_modules/**', 1);
+                    if (readmeFiles.length > 0) {
+                        const content = await vscode.workspace.fs.readFile(readmeFiles[0]);
+                        const contentString = content.toString();
+                        // Limit content to prevent API errors - only show first 2000 characters
+                        const truncatedContent = contentString.length > 2000 
+                            ? contentString.substring(0, 2000) + '\n\n... (content truncated, full file is ' + contentString.length + ' characters)'
+                            : contentString;
+                        return `✅ **Yes! Here's your README.md content:**\n\n\`\`\`markdown\n${truncatedContent}\n\`\`\``;
+                    } else {
+                        return "❌ No README.md file found in your workspace.";
+                    }
+                } catch (error) {
+                    console.error('Error reading README:', error);
+                    return "❌ Error reading README file.";
+                }
             }
             
             // Default workspace access response
@@ -536,7 +552,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             'analyze', 'review', 'explain', 'help with',
             // Add greeting keywords so OpenRouter models get workspace context
             'hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon',
-            'what can you do', 'help me', 'who are you', 'what are you'
+            'what can you do', 'help me', 'who are you', 'what are you',
+            // Add README and file access keywords to match ContextAnalyzer
+            'readme file', 'read me', 'access my readme',
+            'can you access', 'access my', 'show my', 'read my',
+            'my readme', 'the readme', 'readme.md', 'readme content'
         ];
 
         const lowerMessage = userMessage.toLowerCase();
@@ -546,8 +566,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     private async _getFileContentForAI(userMessage: string): Promise<string | null> {
         const lowerMessage = userMessage.toLowerCase();
         
-        // Check for specific file requests
-        if (lowerMessage.includes('readme')) {
+        // Check for specific file requests - enhanced patterns
+        if (lowerMessage.includes('readme') || lowerMessage.includes('read me')) {
             try {
                 const readmeFiles = await vscode.workspace.findFiles('**/README.md', '**/node_modules/**', 1);
                 if (readmeFiles.length > 0) {
@@ -559,7 +579,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             }
         }
         
-        if (lowerMessage.includes('package.json')) {
+        if (lowerMessage.includes('package.json') || lowerMessage.includes('package')) {
             try {
                 const packageFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**', 1);
                 if (packageFiles.length > 0) {
@@ -568,6 +588,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 }
             } catch (error) {
                 console.error('Error reading package.json:', error);
+            }
+        }
+        
+        // Add more common file patterns
+        if (lowerMessage.includes('tsconfig') || lowerMessage.includes('typescript config')) {
+            try {
+                const tsconfigFiles = await vscode.workspace.findFiles('**/tsconfig.json', '**/node_modules/**', 1);
+                if (tsconfigFiles.length > 0) {
+                    const content = await vscode.workspace.fs.readFile(tsconfigFiles[0]);
+                    return `**tsconfig.json Content:**\n\`\`\`json\n${content.toString()}\n\`\`\``;
+                }
+            } catch (error) {
+                console.error('Error reading tsconfig.json:', error);
             }
         }
         

@@ -15,33 +15,28 @@ export class ContextAnalyzer {
     /**
      * Detect if the user is asking about workspace files/folders
      */
-    static isWorkspaceQuery(userMessage: string): boolean {
+    private static isWorkspaceQuery(userMessage: string): boolean {
         const workspaceKeywords = [
-            'files', 'folders', 'directories', 'workspace', 'project',
-            'what files', 'show files', 'list files', 'file structure',
-            'what can you see', 'what do you see', 'explore', 'structure',
-            'what\'s in', 'contents', 'find file', 'search files',
-            'package.json', 'package json', 'src directory', 'src folder',
+            'workspace', 'project', 'code', 'file', 'files', 'directory', 'folder', 'codebase',
+            'source', 'implementation', 'structure', 'overview', 'package.json',
+            'tsconfig', 'build', 'compile', 'what does this', 'explain this', 'how does',
+            'what is in', 'show me', 'list', 'find', 'search', 'analyze', 'review',
+            // File count keywords  
+            'how many', 'count of', 'total of', 'number of',
             'typescript files', '.ts files', 'ts files',
             'how many files', 'total files', 'file count', 'count files',
             'how many folders', 'total folders', 'folder count', 'count folders',
             'folders and files', 'files and folders', 'total count',
-            'project root', 'root folder', 'in total'
+            'project root', 'root folder', 'in total',
+            // Add README and file access keywords
+            'readme', 'readme file', 'read me', 'access my readme',
+            'can you access', 'access my', 'show my', 'read my',
+            'my readme', 'the readme', 'readme.md', 'readme content'
         ];
 
         const messageLower = userMessage.toLowerCase();
-        console.log('🔍 WORKSPACE DEBUG - Message:', `"${messageLower}"`);
-        
-        const matches = workspaceKeywords.filter(keyword => messageLower.includes(keyword));
-        console.log('🔍 WORKSPACE DEBUG - Matching keywords:', matches);
-        
-        const isWorkspace = workspaceKeywords.some(keyword => messageLower.includes(keyword));
-        console.log('🔍 WORKSPACE DEBUG - Is workspace query:', isWorkspace);
-        
-        return isWorkspace;
-    }
-
-    /**
+        return workspaceKeywords.some(keyword => messageLower.includes(keyword));
+    }    /**
      * Detect if this is a greeting or general conversation that should include workspace awareness
      */
     static isGreetingOrGeneral(userMessage: string): boolean {
@@ -91,37 +86,38 @@ export class ContextAnalyzer {
         ];
 
         const messageLower = userMessage.toLowerCase();
-        console.log('🔍 EDIT DEBUG - Message:', `"${messageLower}"`);
-        
-        const isEdit = editKeywords.some(keyword => messageLower.includes(keyword));
-        console.log('🔍 EDIT DEBUG - Is edit query:', isEdit);
-        
-        return isEdit;
+        return editKeywords.some(keyword => messageLower.includes(keyword));
     }
 
     /**
      * Detect the type of help the user is requesting
      */
     static getQueryType(userMessage: string, hasSelectedText: boolean, modelId?: string): 'general' | 'workspace' | 'file-analysis' | 'code-context' | 'file-edit' {
-        if (this.isWorkspaceQuery(userMessage)) {
+        const isWorkspace = this.isWorkspaceQuery(userMessage);
+        if (isWorkspace) {
             return 'workspace';
         }
         
-        if (this.isFileEditQuery(userMessage)) {
+        const isFileEdit = this.isFileEditQuery(userMessage);
+        if (isFileEdit) {
             return 'file-edit';
         }
         
-        if (hasSelectedText || this.isFileAnalysisQuery(userMessage)) {
+        const isFileAnalysis = hasSelectedText || this.isFileAnalysisQuery(userMessage);
+        if (isFileAnalysis) {
             return 'file-analysis';
         }
 
-        if (this.shouldIncludeCodeContext(userMessage, hasSelectedText)) {
+        const shouldIncludeCode = this.shouldIncludeCodeContext(userMessage, hasSelectedText);
+        if (shouldIncludeCode) {
             return 'code-context';
         }
 
         // For greetings and general queries, provide workspace context ONLY for DeepSeek models
         // Other models get enhanced context through the general message flow
-        if (this.isGreetingOrGeneral(userMessage) && modelId?.startsWith('deepseek')) {
+        const isGreeting = this.isGreetingOrGeneral(userMessage);
+        const isDeepSeek = modelId?.startsWith('deepseek');
+        if (isGreeting && isDeepSeek) {
             return 'workspace';
         }
 

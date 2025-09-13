@@ -27,6 +27,14 @@ export interface ModelResponse {
     };
     model: string;
     provider: string;
+    optimized?: boolean;
+    enhancedAt?: number;
+    metadata?: {
+        cached?: boolean;
+        optimizationApplied?: boolean;
+        processingTime?: number;
+        [key: string]: any;
+    };
 }
 
 export interface ProviderConfig {
