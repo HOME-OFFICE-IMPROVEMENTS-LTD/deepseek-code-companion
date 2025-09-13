@@ -5,44 +5,67 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
 ![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)
 
-Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.
-![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)
+Your multi-model AI coding companion for VS Code. Chat with DeepSeek, OpenRouter's 100+ models (GPT-4, Claude, Gemma), and enjoy workspace-aware AI assistance with real-time cost tracking.
 
-Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.
+> 🎉 **Major Update**: Multi-model architecture now live with workspace context for all AI providers!
 
-> 🚀 **Fast-Track Development**: See our [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md) for detailed feature development plans
+## 🎯 **Current Status & Next Phase**
 
-## 🎯 **Current Status & Roadmap**
+| Phase | Status | Features | Completion |
+|-------|--------|----------|------------|
+| **Foundation** | ✅ **Complete** | Chat interface, workspace analysis | 100% |
+| **Multi-Model** | ✅ **Complete** | OpenRouter integration, 100+ models, cost tracking | 100% |
+| **Context Enhancement** | ✅ **Complete** | Universal workspace context, file access, smart greetings | 100% |
+| **Performance & UX** | 🚀 **Next Phase** | Error handling, caching, response optimization | 0% |
+| **Advanced Features** | ⏳ **Planned** | Security scanning, code analysis, documentation gen | 0% |
+| **Marketplace** | 🎯 **Target** | Professional listing, branding, community features | 0% |
 
-| Phase | Status | Features | Timeline |
-|-------|--------|----------|----------|
-| **Foundation** | ✅ **Complete** | Chat interface, workspace analysis | ✅ Done |
-| **Phase 1** | ✅ **Complete** | OpenRouter integration, multi-model support, cost tracking | ✅ Done |
-| **Phase 2** | ⏳ **Planned** | Security scanning, code analysis, performance metrics | Week 2 |
-| **Phase 3** | ⏳ **Planned** | Documentation generation, test creation, metrics dashboard | Week 3 |
-| **Marketplace** | 🎯 **Target** | Professional listing, branding, community features | Week 2 |
-
-📋 **[View Complete Roadmap →](IMPLEMENTATION_ROADMAP.md)**
+### 🚀 **What's New in Latest Version**
+- ✅ **Multi-Model Architecture**: Seamless switching between DeepSeek and OpenRouter's 100+ models
+- ✅ **Universal Workspace Context**: All AI models now understand your project structure  
+- ✅ **Smart Context Injection**: Automatic file reading and workspace awareness
+- ✅ **Enhanced Model Selection**: Fixed model-aware routing and response handling
+- ✅ **Cost Optimization**: Real-time tracking with daily spending limits
+- ✅ **File Operations**: Read, analyze, and edit capabilities across all models
 
 ## ✨ Features
 
 ### **🎉 Current Features**
-- 💬 **AI Chat Interface**: Chat with DeepSeek AI directly in VS Code's sidebar
-- 🔍 **Workspace Intelligence**: Smart file exploration and project analysis
-- 🛠️ **Code Generation**: AI-powered code snippets and explanations
-- 🔄 **Smart Refactoring**: Get intelligent code refactoring suggestions
-- 📊 **Project Insights**: File structure analysis, TypeScript detection, and statistics
-- 🎯 **Context-Aware**: Understands your project structure for better responses
-- 🔗 **Multi-Model Support**: OpenRouter integration with 100+ AI models (GPT-4, Claude, Llama, etc.)
-- 💰 **Cost Tracking**: Real-time API usage and cost monitoring with daily limits
-- 🎛️ **Model Selection**: Choose from DeepSeek, OpenAI, Anthropic, Meta, and more
-- ⚡ **Smart Context**: Automatic workspace context for greetings and queries
+- 💬 **Multi-Model Chat**: Choose from DeepSeek or 100+ OpenRouter models (GPT-4, Claude, Gemma, Llama)
+- 🧠 **Universal Workspace Intelligence**: All AI models understand your project structure and files
+- 💰 **Real-Time Cost Tracking**: Monitor API usage and spending with daily limits
+- 🎯 **Smart Context Injection**: Automatic workspace context for greetings and file queries
+- 🔄 **Intelligent Model Routing**: Context-aware model selection for optimal responses
+- 📁 **File Operations**: Read, analyze, and edit files with AI assistance
+- 🏗️ **Project Analysis**: File structure, TypeScript detection, and project statistics
+- ⚡ **Enhanced Performance**: Optimized context handling and response generation
+- 🎛️ **Flexible Configuration**: Customizable models, cost limits, and behavior settings
+- 🔍 **Smart Query Detection**: Automatic workspace context for relevant queries
 
-### **🚀 Coming Soon** 
+### **🚀 Coming Next** 
+- �️ **Enhanced Error Handling**: Robust fallbacks and error recovery
+- ⚡ **Response Caching**: Faster responses for repeated queries  
+- � **Usage Analytics**: Detailed insights into model performance and costs
 - 🔒 **Security Scanner**: OWASP compliance and vulnerability detection
-- 📈 **Real-time Metrics**: Code quality, performance, and maintainability scores
-- 🧪 **Test Generation**: Intelligent unit and integration test creation
 - 📚 **Auto Documentation**: API docs, README, and architecture generation
+
+## 🌟 **What Makes This Extension Unique**
+
+Unlike other AI coding extensions that lock you into a single provider, DeepSeek Code Companion offers:
+
+| Feature | Our Extension | GitHub Copilot | ChatGPT Extensions | Claude Extensions |
+|---------|---------------|----------------|--------------------|-------------------|
+| **Multiple AI Models** | ✅ 100+ models | ❌ GPT only | ❌ OpenAI only | ❌ Anthropic only |
+| **Cost Transparency** | ✅ Real-time tracking | ❌ Hidden costs | ❌ No tracking | ❌ No tracking |
+| **Workspace Context** | ✅ Universal support | ✅ Limited | ❌ Basic chat | ❌ Basic chat |
+| **Model Comparison** | ✅ Easy switching | ❌ No choice | ❌ No choice | ❌ No choice |
+| **Provider Freedom** | ✅ Multi-provider | ❌ GitHub locked | ❌ OpenAI locked | ❌ Anthropic locked |
+
+**🎯 Perfect for developers who want:**
+- Freedom to choose the best AI model for each task
+- Transparency in AI costs and usage
+- Deep workspace understanding across all models
+- The ability to compare DeepSeek vs GPT vs Claude easily
 
 ## 🚀 Quick Start
 
@@ -65,15 +88,15 @@ Your official AI partner in VS Code. Chat with DeepSeek and other models, genera
 
 ### Usage
 1. Click the DeepSeek icon in the Activity Bar
-2. Select your preferred AI model from the dropdown
-3. Start chatting with AI in the sidebar
+2. Select your preferred AI model from the dropdown (DeepSeek or 100+ OpenRouter models)
+3. Start chatting with AI in the sidebar - all models have workspace awareness!
 4. Monitor your daily usage and costs in real-time
-5. Ask questions like:
-   - "Show me the file structure"
-   - "How many TypeScript files are in this project?"
-   - "Generate a React component"
-   - "Refactor this function"
-   - "Hi" (for workspace-aware greeting)
+5. Try these example queries:
+   - **"hi"** - Get a workspace-aware greeting from any model
+   - **"Show me the file structure"** - Explore your project
+   - **"Analyze my package.json"** - Get specific file insights
+   - **"Generate a React component"** - AI-powered code generation
+   - **"Who are you?"** - See model identity and capabilities
 
 ## 🎯 Supported Queries
 
@@ -122,6 +145,33 @@ npm run package
 | `deepseekCodeCompanion.dailyCostLimit` | number | `5.0` | Daily API cost limit in USD to prevent accidental overspending |
 | `deepseekCodeCompanion.autoSwitchToDeepSeek` | boolean | `true` | Automatically switch to DeepSeek models for code-related queries |
 | `deepseekCodeCompanion.showCostInChat` | boolean | `true` | Display API usage cost in chat interface |
+
+## 🔮 **Next Phase: Performance & Polish**
+
+Based on our successful multi-model implementation, here's what's coming next:
+
+### **Phase 4: Performance & UX Optimization** (Immediate Priority)
+- 🛡️ **Enhanced Error Handling**: Graceful fallbacks when models fail
+- ⚡ **Response Caching**: Cache common responses for faster interactions
+- 📊 **Usage Analytics**: Track model performance and user preferences
+- 🎨 **UI Polish**: Improved loading states and error messages
+- 🔄 **Background Processing**: Non-blocking operations for better UX
+
+### **Phase 5: Advanced Intelligence** (Medium Term)
+- 🔒 **Security Analysis**: Code vulnerability scanning with AI
+- 📚 **Documentation Generation**: Auto-generate README, docs, and comments
+- 🧪 **Test Creation**: AI-powered unit and integration test generation
+- 📈 **Code Metrics**: Quality, maintainability, and performance scoring
+- 🎯 **Smart Suggestions**: Proactive code improvement recommendations
+
+### **Phase 6: Community & Marketplace** (Long Term)
+- 🏪 **VS Code Marketplace**: Professional listing and promotion
+- 👥 **Community Features**: Share configurations and model preferences
+- 📦 **Plugin Ecosystem**: Allow third-party model providers
+- 📊 **Usage Dashboard**: Comprehensive analytics and insights
+- 🌍 **Internationalization**: Multi-language support
+
+**Want to contribute to the next phase?** Check our [Contributing Guidelines](CONTRIBUTING.md)!
 
 ## 🤝 Contributing
 
