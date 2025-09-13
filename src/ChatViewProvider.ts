@@ -485,39 +485,40 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 return null;
             }
 
-            // Get basic workspace info
-            let context = `**VS Code Workspace Context:**\n`;
-            context += `Project: ${workspaceFolders[0].name}\n`;
-            context += `Path: ${workspaceFolders[0].uri.fsPath}\n\n`;
+            // Get basic workspace info - keep it simple and user-focused
+            let context = `**Current Workspace:**\n`;
+            context += `📂 Project: ${workspaceFolders[0].name}\n`;
+            context += `📍 Location: ${workspaceFolders[0].uri.fsPath}\n\n`;
 
             // Get file counts
             const allFiles = await vscode.workspace.findFiles('**/*', '**/node_modules/**', 50);
             const tsFiles = await vscode.workspace.findFiles('**/*.ts', '**/node_modules/**', 20);
             const jsFiles = await vscode.workspace.findFiles('**/*.js', '**/node_modules/**', 20);
             
-            context += `Files: ${allFiles.length}${allFiles.length >= 50 ? '+' : ''} total`;
+            context += `📊 **Quick Stats:**\n`;
+            context += `• ${allFiles.length}${allFiles.length >= 50 ? '+' : ''} total files\n`;
             if (tsFiles.length > 0) {
-                context += `, ${tsFiles.length} TypeScript`;
+                context += `• ${tsFiles.length} TypeScript files\n`;
             }
             if (jsFiles.length > 0) {
-                context += `, ${jsFiles.length} JavaScript`;
+                context += `• ${jsFiles.length} JavaScript files\n`;
             }
-            context += `\n`;
 
-            // Get package.json info if available
+            // Only include package.json name, not description to avoid confusion
             const packageFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**', 1);
             if (packageFiles.length > 0) {
                 try {
                     const packageContent = await vscode.workspace.fs.readFile(packageFiles[0]);
                     const packageData = JSON.parse(packageContent.toString());
-                    context += `Package: ${packageData.name || 'N/A'} v${packageData.version || 'N/A'}\n`;
-                    if (packageData.description) {
-                        context += `Description: ${packageData.description}\n`;
+                    if (packageData.name && packageData.version) {
+                        context += `• Package: ${packageData.name} v${packageData.version}\n`;
                     }
                 } catch (error) {
                     // Ignore package.json parsing errors
                 }
             }
+
+            context += `\n💡 You can help analyze, review, or modify files in this workspace.`;
 
             return context;
         } catch (error) {
