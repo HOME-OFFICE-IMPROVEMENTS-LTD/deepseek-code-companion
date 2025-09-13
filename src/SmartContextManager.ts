@@ -33,65 +33,80 @@ export class SmartContextManager {
     };
 
     /**
-     * Optimizes context for a specific model and conversation
+     * Optimizes conversation context for better model performance
      */
     async optimizeContext(
-        messages: ChatMessage[],
-        modelConfig: ModelConfig,
-        taskType: 'coding' | 'general' | 'analysis' | 'creative' = 'general'
+        messages: ChatMessage[], 
+        modelConfig: any, 
+        taskType: 'coding' | 'general' | 'analysis' | 'creative'
     ): Promise<{
         optimizedMessages: ChatMessage[];
         contextSummary: string;
         tokensUsed: number;
         compressionApplied: boolean;
     }> {
-                // PRESERVE README-ENHANCED MESSAGES FROM OPTIMIZATION
-        // Check if any message contains README content that was enhanced by ChatViewProvider
-        console.log('[SmartContextManager] Checking messages for README content...');
-        console.log('[SmartContextManager] Message count:', messages.length);
-        messages.forEach((msg, i) => {
-            console.log(`[SmartContextManager] Message ${i} content length:`, msg.content.length);
-            console.log(`[SmartContextManager] Message ${i} has README marker:`, msg.content.includes('[SYSTEM: Here is the README.md content for context:]'));
-            console.log(`[SmartContextManager] Message ${i} has README (any):`, msg.content.toLowerCase().includes('readme'));
-            console.log(`[SmartContextManager] Message ${i} preview:`, msg.content.substring(0, 100) + '...');
-        });
-        
-        const hasReadmeContent = messages.some(msg => 
-            msg.content.includes('[SYSTEM: Here is the README.md content for context:]') ||
-            msg.content.toLowerCase().includes('readme.md content for context')
-        );
-        
-        if (hasReadmeContent) {
-            console.log('[SmartContextManager] ✅ PRESERVING README-enhanced messages from optimization');
-            // Return messages as-is to preserve README content
+        try {
+            // Skip optimization for simple conversations that already have good context
+            const lastMessage = messages[messages.length - 1]?.content || '';
+            const isSimpleQuestion = lastMessage.length < 50 && 
+                                   !lastMessage.includes('code') && 
+                                   !lastMessage.includes('file') &&
+                                   !lastMessage.includes('function');
+            
+            // Check if README content is already in messages
+            const hasREADMEContent = messages.some(msg => 
+                msg.content.includes('📂') || msg.content.includes('workspace') || 
+                msg.content.includes('project') && msg.content.length > 200
+            );
+            
+            if (isSimpleQuestion && hasREADMEContent) {
+                return {
+                    optimizedMessages: messages,
+                    contextSummary: 'Simple question with existing context preserved',
+                    tokensUsed: messages.reduce((sum, msg) => sum + this.estimateTokenCount(msg.content), 0),
+                    compressionApplied: false
+                };
+            }
+        } catch (error) {
+            console.error('❌ SmartContextManager optimization error:', error);
+            // Return original messages on error
             return {
                 optimizedMessages: messages,
-                contextSummary: 'README content preserved',
+                contextSummary: 'Error occurred, using original messages',
                 tokensUsed: messages.reduce((sum, msg) => sum + this.estimateTokenCount(msg.content), 0),
                 compressionApplied: false
             };
-        } else {
-            console.log('[SmartContextManager] ❌ No README content found, proceeding with optimization');
         }
         
-        const availableTokens = Math.floor(modelConfig.maxTokens * 0.8); // Reserve 20% for response
-        const targetContextTokens = Math.min(availableTokens, this.settings.maxTokens);
+        try {
+            const availableTokens = Math.floor(modelConfig.maxTokens * 0.8); // Reserve 20% for response
+            const targetContextTokens = Math.min(availableTokens, this.settings.maxTokens);
 
-        // Gather all available context
-        await this.gatherCurrentContext(taskType);
+            // Gather all available context
+            await this.gatherCurrentContext(taskType);
 
-        // Score and prioritize context chunks
-        const prioritizedContext = this.prioritizeContext(messages, taskType);
+            // Score and prioritize context chunks
+            const prioritizedContext = this.prioritizeContext(messages, taskType);
 
-        // Build optimized context within token limits
-        const result = this.buildOptimizedContext(
-            messages,
-            prioritizedContext,
-            targetContextTokens,
-            taskType
-        );
+            // Build optimized context within token limits
+            const result = this.buildOptimizedContext(
+                messages,
+                prioritizedContext,
+                targetContextTokens,
+                taskType
+            );
 
-        return result;
+            return result;
+        } catch (error) {
+            console.error('❌ SmartContextManager full optimization error:', error);
+            // Return original messages on any optimization error
+            return {
+                optimizedMessages: messages,
+                contextSummary: 'Optimization failed, using original messages',
+                tokensUsed: messages.reduce((sum, msg) => sum + this.estimateTokenCount(msg.content), 0),
+                compressionApplied: false
+            };
+        }
     }
 
     /**

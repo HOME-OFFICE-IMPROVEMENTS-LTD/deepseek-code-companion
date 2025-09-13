@@ -42,7 +42,7 @@ export class DeepSeekProvider extends BaseModelProvider {
             id: 'deepseek-coder',
             name: 'DeepSeek Coder',
             provider: 'deepseek',
-            maxTokens: 16384,
+            maxTokens: 4096,  // Conservative limit for DeepSeek Coder model
             costPer1kTokens: { input: 0.0014, output: 0.0028 },
             capabilities: ['code-generation', 'code-review', 'refactoring']
         }
@@ -67,12 +67,23 @@ export class DeepSeekProvider extends BaseModelProvider {
         }
 
         return await ErrorHandler.withRetry(async () => {
+            // Ensure max_tokens is within valid range for DeepSeek API (1-8192)
+            const requestedTokens = options.maxTokens || model.maxTokens;
+            let validMaxTokens = Math.min(Math.max(requestedTokens, 1), 8192);
+            
+            // Apply model-specific limits based on testing
+            if (modelId === 'deepseek-coder') {
+                validMaxTokens = Math.min(validMaxTokens, 4096); // More conservative for coder model
+            }
+            
             const requestBody = {
                 model: modelId,
                 messages: messages.map(m => ({ role: m.role, content: m.content })),
-                max_tokens: options.maxTokens || model.maxTokens,
+                max_tokens: validMaxTokens,
                 temperature: options.temperature || 0.7
             };
+            
+            console.log(`🔍 DeepSeek API request - model: ${modelId}, max_tokens: ${validMaxTokens}, requestedTokens: ${requestedTokens}, model.maxTokens: ${model.maxTokens}`);
             
             const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
                 method: 'POST',

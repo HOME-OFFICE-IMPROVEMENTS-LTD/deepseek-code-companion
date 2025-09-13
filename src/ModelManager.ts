@@ -71,10 +71,18 @@ export class ModelManager {
 
     async sendMessage(
         messages: ChatMessage[], 
-        modelId: string, 
+        modelId: string,
         options?: { maxTokens?: number; temperature?: number }
     ): Promise<ModelResponse> {
         const startTime = Date.now();
+        
+        // 🔍 DEBUG: Log all parameters being passed
+        console.log(`🔍 MODEL MANAGER sendMessage called with:`, {
+            modelId,
+            optionsMaxTokens: options?.maxTokens,
+            optionsTemperature: options?.temperature,
+            messagesCount: messages.length
+        });
         
         // Check daily cost limit
         if (this.costTracker.dailyUsage >= this.costTracker.dailyLimit) {
@@ -103,18 +111,11 @@ export class ModelManager {
 
             // Optimize context for this model and conversation
             const taskType = this.detectTaskType(messages);
-            console.log('🔍 MODEL MANAGER - Before context optimization, message count:', messages.length);
-            console.log('🔍 MODEL MANAGER - Messages contain README:', messages.some(m => m.content.includes('[SYSTEM: Here is the README.md content for context:]')));
-            
             const contextResult = await smartContextManager.optimizeContext(
                 messages, 
                 model, 
                 taskType
             );
-            
-            console.log('🔍 MODEL MANAGER - After context optimization, message count:', contextResult.optimizedMessages.length);
-            console.log('🔍 MODEL MANAGER - Optimized messages contain README:', contextResult.optimizedMessages.some(m => m.content.includes('[SYSTEM: Here is the README.md content for context:]')));
-            console.log('🔍 MODEL MANAGER - Context summary:', contextResult.contextSummary);
 
             // Use optimized response system with retry and caching
             const response = await responseOptimizer.optimizeResponse(
@@ -169,6 +170,15 @@ export class ModelManager {
 
             return enhancedResponse;
         } catch (error) {
+            console.error('❌ ModelManager.sendMessage error details:', {
+                error: error,
+                errorMessage: error instanceof Error ? error.message : 'Unknown error',
+                errorStack: error instanceof Error ? error.stack : 'No stack trace',
+                modelId,
+                messagesCount: messages.length,
+                lastMessagePreview: messages[messages.length - 1]?.content?.substring(0, 100)
+            });
+
             // Clear typing indicator on error
             uiPolishManager.clearTypingIndicator();
             

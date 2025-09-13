@@ -24,7 +24,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         webviewView.webview.onDidReceiveMessage(async data => {
-            console.log('🔍 CHAT DEBUG - Received message:', data);
             switch (data.type) {
                 case 'sendMessage':
                     await this._handleChatMessage(data.message, data.selectedModel);
@@ -110,19 +109,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                         // BULLETPROOF FIX: Inject README content for ALL models IMMEDIATELY
             let enhancedUserMessage = userMessage;
             if (userMessage.toLowerCase().includes('readme')) {
-                console.log('🔍 BULLETPROOF FIX - README injection triggered for message:', userMessage);
                 try {
                     const readmeFiles = await vscode.workspace.findFiles('**/README.md', '**/node_modules/**', 1);
-                    console.log('🔍 BULLETPROOF FIX - Found README files:', readmeFiles.length);
                     if (readmeFiles.length > 0) {
                         const content = await vscode.workspace.fs.readFile(readmeFiles[0]);
                         const contentString = new TextDecoder().decode(content);
-                        console.log('🔍 BULLETPROOF FIX - README content length:', contentString.length);
                         // LIMIT README SIZE to prevent API errors
                         const limitedContent = contentString.substring(0, 2000); // Limit to 2KB
                         enhancedUserMessage = `${userMessage}\n\n[SYSTEM: Here is the README.md content for context:]\n${limitedContent}`;
-                        console.log('🔍 BULLETPROOF FIX - Enhanced message created, total length:', enhancedUserMessage.length);
-                        console.log('🔍 BULLETPROOF FIX - Enhanced message preview:', enhancedUserMessage.substring(0, 200) + '...');
                     }
                 } catch (error) {
                     console.error('Error reading README for injection:', error);
@@ -133,6 +127,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             const config = vscode.workspace.getConfiguration('deepseekCodeCompanion');
             const defaultModel = config.get<string>('defaultModel') || 'deepseek-chat';
             const modelToUse = selectedModel || defaultModel;
+            
+            // Check if this is a DeepSeek model for template responses
+            const isDeepSeekModel = modelToUse.includes('deepseek') || modelToUse === 'deepseek-chat' || modelToUse === 'deepseek-coder';
 
             // Add user message to conversation history (use enhanced message for README requests)
             const userChatMessage: ChatMessage = {
@@ -149,22 +146,27 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             
             // Debug logging for README requests
             if (userMessage.toLowerCase().includes('readme')) {
-                console.log('🔍 CHAT HANDLER - README request detected');
-                console.log('🔍 CHAT HANDLER - Query type:', queryType);
-                console.log('🔍 CHAT HANDLER - Model:', modelToUse);
+                console.log('🔍 README request detected for model:', modelToUse);
             }
 
             let responseContent: string;
 
             switch (queryType) {
                 case 'workspace':
-                    responseContent = await this._handleWorkspaceQuery(userMessage);
-                    this._sendResponse(responseContent);
-                    break;
+                    responseContent = await this._handleWorkspaceQuery(userMessage, modelToUse);
+                    // If no template response (non-DeepSeek models), fall through to general case
+                    if (responseContent && responseContent.trim()) {
+                        this._sendResponse(responseContent);
+                        break;
+                    }
+                    // Fall through to default case for non-DeepSeek models
                 case 'file-edit':
-                    responseContent = await this._handleFileEditQuery(userMessage);
-                    this._sendResponse(responseContent);
-                    break;
+                    if (queryType === 'file-edit') {
+                        responseContent = await this._handleFileEditQuery(userMessage);
+                        this._sendResponse(responseContent);
+                        break;
+                    }
+                    // Fall through if not file-edit
                 case 'file-analysis':
                 case 'code-context':
                     const enhancedMessage = codeContext?.code 
@@ -192,7 +194,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 default:
                     // UNIVERSAL WORKSPACE FIX: Messages already contain enhanced content
                     const messagesForAPI = [...this.conversationHistory];
-                    console.log('🔍 README INJECTION - Enhanced message length for model:', modelToUse, messagesForAPI[messagesForAPI.length - 1].content.length);
                     
                     const generalResponse = await this.modelManager.sendMessage(messagesForAPI, modelToUse);
                     responseContent = generalResponse.content;
@@ -217,52 +218,37 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _handleWorkspaceQuery(userMessage: string): Promise<string> {
+    private async _handleWorkspaceQuery(userMessage: string, modelToUse?: string): Promise<string> {
         try {
             const workspaceFolders = vscode.workspace.workspaceFolders;
             if (!workspaceFolders || workspaceFolders.length === 0) {
                 return "❌ No workspace is currently open in VS Code.";
             }
             
+            // Check if this is a DeepSeek model for template responses
+            const isDeepSeekModel = modelToUse ? 
+                (modelToUse.includes('deepseek') || modelToUse === 'deepseek-chat' || modelToUse === 'deepseek-coder') : 
+                true; // Default to true if no model specified
+            
             const lowerMessage = userMessage.toLowerCase();
             
-            // Check for greetings - provide friendly workspace-aware response
+            // Check for greetings - provide friendly but concise response
             const greetingKeywords = ['hi', 'hello', 'hey', 'greetings'];
-            const isGreeting = greetingKeywords.some(keyword => lowerMessage.includes(keyword)) || 
-                              lowerMessage.trim().length <= 10;
+            const isGreeting = greetingKeywords.some(keyword => lowerMessage.includes(keyword)) && 
+                              lowerMessage.trim().length <= 15 && 
+                              !lowerMessage.includes('who') && !lowerMessage.includes('what') && !lowerMessage.includes('name');
             
-            if (isGreeting) {
-                let response = "👋 **Hello! I'm your DeepSeek Code Companion.**\n\n";
-                response += "✅ I have access to your workspace and can see:\n\n";
-                
-                // Get a quick file count
-                const allFiles = await vscode.workspace.findFiles('**/*', '**/node_modules/**', 100);
-                const tsFiles = await vscode.workspace.findFiles('**/*.ts', '**/node_modules/**', 50);
-                const jsFiles = await vscode.workspace.findFiles('**/*.js', '**/node_modules/**', 50);
-                
-                for (const folder of workspaceFolders) {
-                    response += `📂 **${folder.name}**\n`;
-                    response += `   📍 ${vscode.workspace.asRelativePath(folder.uri)}\n`;
-                }
-                
-                response += `\n📊 **Quick Stats:**\n`;
-                response += `   📄 ${allFiles.length}${allFiles.length >= 100 ? '+' : ''} total files\n`;
-                if (tsFiles.length > 0) {
-                    response += `   🔷 ${tsFiles.length} TypeScript files\n`;
-                }
-                if (jsFiles.length > 0) {
-                    response += `   🟨 ${jsFiles.length} JavaScript files\n`;
-                }
-                
-                response += "\n🤖 **I can help you with:**\n";
-                response += "• 💬 **Code questions** - Ask about any file or function\n";
-                response += "• 🔍 **Code analysis** - Review and improve your code\n";
-                response += "• 🛠️ **Debugging** - Find and fix issues\n";
-                response += "• ⚡ **Code generation** - Create new functions, classes, or features\n";
-                response += "• 📋 **Refactoring** - Optimize and restructure code\n\n";
-                response += "💡 **Try asking:** \"What files do I have?\", \"Analyze this code\", or just describe what you want to build!";
-                
-                return response;
+            if (isGreeting && isDeepSeekModel) {
+                const folderName = workspaceFolders[0]?.name || 'workspace';
+                return `👋 Hello! I'm your DeepSeek Code Companion. I can see your **${folderName}** project and I'm ready to help with code questions, analysis, or generation. What would you like to work on?`;
+            }
+            
+            // Check for identity questions
+            const identityKeywords = ['who are you', 'what are you', 'your name', 'who is this', 'what is your name'];
+            const isIdentityQuestion = identityKeywords.some(keyword => lowerMessage.includes(keyword));
+            
+            if (isIdentityQuestion && isDeepSeekModel) {
+                return `Hello! 👋 I'm **DeepSeek Code Companion**, your AI-powered coding assistant inside VS Code. You can call me **DeepSeek** for short.\n\nI'm here to help you with code, architecture, debugging, and development questions. I can see your workspace and provide contextually-aware assistance. How can I help you today? 😊`;
             }
             
             // Check for file structure queries
@@ -312,23 +298,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 }
             }
             
-            // Default workspace access response
-            let response = "📁 **Workspace Access:**\n\n";
-            response += "✅ Yes, I have access to your VS Code workspace!\n\n";
-            
-            for (const folder of workspaceFolders) {
-                response += `🗂️ **${folder.name}**\n`;
-                response += `📂 \`${folder.uri.fsPath}\`\n\n`;
+            // Concise workspace response for general questions - only for DeepSeek models
+            if (isDeepSeekModel) {
+                const folderName = workspaceFolders[0]?.name || 'workspace';
+                return `I'm your DeepSeek Code Companion! I can see your **${folderName}** project and help with code analysis, debugging, generation, and questions. What would you like me to help you with?`;
+            } else {
+                // For non-DeepSeek models, let them respond naturally by returning empty string
+                // This will cause the method to fall through to the normal AI model processing
+                return '';
             }
-            
-            response += "🤖 **What I can help with:**\n";
-            response += "• Analyze your code files\n";
-            response += "• Review and refactor code\n";
-            response += "• Answer questions about your project\n";
-            response += "• Generate new code based on your existing files\n\n";
-            response += "📝 Just share your code or ask me about specific files!";
-            
-            return response;
         } catch (error) {
             console.error('Error handling workspace query:', error);
             return 'Sorry, I encountered an error while checking workspace access.';
