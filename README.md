@@ -177,7 +177,7 @@ The extension's standout feature - real automation that actually works:
 
 ## 🆘 **Support & Contributing**
 
-- 📧 **Support**: support@hoiltd.com
+- 📧 **Support**: info@hoiltd.com
 - 💬 **Issues**: [GitHub Issues](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion/issues)
 - 📚 **Documentation**: [Wiki](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion/wiki)
 - 🤝 **Contributing**: See [Contributing Guide](CONTRIBUTING.md)
