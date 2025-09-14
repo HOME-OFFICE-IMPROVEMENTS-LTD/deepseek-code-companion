@@ -135,7 +135,8 @@ suite('Phase 4 Enhancement Tests', () => {
             assert.ok(metrics.contextManager);
         });
 
-        test('should get model recommendations', async () => {
+        test('should get model recommendations', async function() {
+            this.timeout(10000); // Increase timeout to 10 seconds for CI
             const recommendations = await manager.getModelRecommendations('coding', false);
             assert.ok(Array.isArray(recommendations));
             // Should return available models even if no quality scores yet
