@@ -1,19 +1,43 @@
 {
-  "name": "deepseek-code-companion",
-  "displayName": "DeepSeek Code Companion",
-  "description": "Your official AI partner in VS Code. Chat with DeepSeek and other models, generate code, and refactor with full context awareness.",
-  "version": "0.0.1",
-  "publisher": "Home & Office Improvements",
+  "name": "hoiltd-deepseek-code-companion",
+  "displayName": "HOILTD DeepSeek Code Companion",
+  "description": "Professional AI coding assistant with DeepSeek integration, advanced automation features, and comprehensive development tools for VS Code.",
+  "version": "1.0.0",
+  "publisher": "hoiltd",
   "icon": "images/deepseek-icon-128.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion.git"
   },
+  "homepage": "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion",
+  "bugs": {
+    "url": "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion/issues"
+  },
+  "keywords": [
+    "ai",
+    "deepseek", 
+    "code-assistant",
+    "automation",
+    "security",
+    "documentation",
+    "testing",
+    "phase5",
+    "productivity"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "qna": "marketplace",
   "engines": {
     "vscode": "^1.103.0"
   },
   "categories": [
-    "Other"
+    "AI",
+    "Machine Learning",
+    "Other",
+    "Testing",
+    "Linters"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -24,6 +48,41 @@
       {
         "command": "deepSeek-code-companion.focusChat",
         "title": "Focus DeepSeek Chat",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.scanSecurity",
+        "title": "Phase 5 - Security Scan",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.generateDocs",
+        "title": "Phase 5 - Generate Documentation",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.generateTests",
+        "title": "Phase 5 - Generate Tests",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.showMetrics",
+        "title": "Phase 5 - Show Metrics Dashboard",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.runAutomation",
+        "title": "Phase 5 - Run Automation",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.runTests",
+        "title": "Phase 5 - Run Tests",
+        "category": "DeepSeek"
+      },
+      {
+        "command": "deepseek.phase5.demo",
+        "title": "Phase 5 - Demo Features",
         "category": "DeepSeek"
       }
     ],
@@ -69,9 +128,9 @@
         },
         "deepseekCodeCompanion.dailyCostLimit": {
           "type": "number",
-          "default": 5.0,
+          "default": 5,
           "minimum": 0.1,
-          "maximum": 100.0,
+          "maximum": 100,
           "description": "Daily API cost limit in USD to prevent accidental overspending",
           "order": 4
         },
@@ -102,17 +161,18 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.103.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
+    "@types/node": "^22.18.3",
+    "@types/vscode": "^1.103.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
-    "eslint": "^9.34.0",
-    "typescript": "^5.9.2",
-    "ts-loader": "^9.5.4",
-    "webpack": "^5.101.3",
-    "webpack-cli": "^6.0.1",
     "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.34.0",
+    "ts-loader": "^9.5.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
   }
 }
