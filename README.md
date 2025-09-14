@@ -1,140 +1,188 @@
-# 🤖 DeepSeek Code Companion
+# 🤖 HOILTD DeepSeek Code Companion
 
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/hoiltd.hoiltd-deepseek-code-companion)](https://marketplace.visualstudio.com/items?itemName=hoiltd.hoiltd-deepseek-code-companion)
 [![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/hoiltd.hoiltd-deepseek-code-companion)](https://marketplace.visualstudio.com/items?itemName=hoiltd.hoiltd-deepseek-code-companion)
 [![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/hoiltd.hoiltd-deepseek-code-companion)](https://marketplace.visualstudio.com/items?itemName=hoiltd.hoiltd-deepseek-code-companion)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-An intelligent VS Code extension that enhances your development workflow with AI-powered code analysis, documentation generation, testing automation, and security validation - powered by the DeepSeek API.
+**Your multi-model AI coding companion for VS Code.** Chat with DeepSeek, OpenRouter's 100+ models (GPT-4, Claude, Gemma), and enjoy workspace-aware AI assistance with real-time cost tracking plus advanced Phase 5 automation features.
 
-## ✨ Features
+> 🎉 **Latest:** Multi-model architecture with Phase 5 automation system - security scanning, documentation generation, test creation, and code metrics!
 
-### 🔍 **Intelligent Code Analysis**
-- Real-time code quality assessment
-- Performance optimization suggestions
-- Code smell detection and remediation
-- Architecture review and recommendations
+## 🎯 **Current Status & Features**
 
-### 📚 **Smart Documentation Generator**
-- Automatic README.md generation
-- API documentation creation
+| Phase | Status | Features | Completion |
+|-------|--------|----------|------------|
+| **Foundation** | ✅ **Complete** | Chat interface, workspace analysis | 100% |
+| **Multi-Model** | ✅ **Complete** | OpenRouter integration, 100+ models, cost tracking | 100% |
+| **Context Enhancement** | ✅ **Complete** | Universal workspace context, file access, smart greetings | 100% |
+| **Performance & UX** | ✅ **Complete** | Error handling, caching, response optimization | 100% |
+| **Phase 5 Automation** | ✅ **LIVE** | Security scanning, documentation gen, test creation, metrics | 100% |
+
+## ✨ **What Makes This Extension Unique**
+
+Unlike other AI coding extensions that lock you into a single provider, HOILTD DeepSeek Code Companion offers:
+
+| Feature | Our Extension | GitHub Copilot | ChatGPT Extensions | Claude Extensions |
+|---------|---------------|----------------|--------------------|-------------------|
+| **Multiple AI Models** | ✅ 100+ models | ❌ GPT only | ❌ OpenAI only | ❌ Anthropic only |
+| **Cost Transparency** | ✅ Real-time tracking | ❌ Hidden costs | ❌ No tracking | ❌ No tracking |
+| **Workspace Context** | ✅ Universal support | ✅ Limited | ❌ Basic chat | ❌ Basic chat |
+| **Automation Suite** | ✅ Phase 5 system | ❌ No automation | ❌ No automation | ❌ No automation |
+| **Security Scanning** | ✅ OWASP compliance | ❌ None | ❌ None | ❌ None |
+| **Provider Freedom** | ✅ Multi-provider | ❌ GitHub locked | ❌ OpenAI locked | ❌ Anthropic locked |
+
+## 🚀 **Core Features**
+
+### 💬 **Multi-Model AI Chat**
+- **DeepSeek Integration**: Direct access to latest DeepSeek models
+- **100+ OpenRouter Models**: GPT-4, Claude, Gemma, Llama, and more
+- **Universal Workspace Intelligence**: All AI models understand your project structure
+- **Smart Context Injection**: Automatic workspace context for relevant queries
+- **Cost Management**: Real-time tracking with daily spending limits
+
+### 🤖 **Phase 5 Automation System**
+The extension's standout feature - real automation that actually works:
+
+#### 🔒 **Security Scanner** 
+```
+🔒 SECURITY SCAN RESULTS:
+✅ No SQL injection vulnerabilities found
+✅ No XSS vulnerabilities detected
+⚠️  Found 1 potential hardcoded secret in config file
+✅ OWASP Top 10 compliance: 9/10 passed
+```
+- OWASP Top 10 vulnerability detection
+- Pattern-based security analysis
+- Compliance reporting with actionable recommendations
+
+#### 📚 **Documentation Generator**
+```
+📚 DOCUMENTATION GENERATED:
+✅ API documentation created (12 endpoints documented)
+✅ README.md updated with latest features
+✅ Architecture documentation generated
+✅ Code comments analyzed and improved
+```
+- Automated README and API documentation
 - Code comment enhancement
-- Technical specification generation
+- Architecture documentation from code analysis
 
-### 🧪 **Advanced Testing Suite**
-- Automated test case generation
-- Test coverage analysis
-- Performance benchmarking
-- Integration test scaffolding
+#### 🧪 **Test Generator**
+```
+🧪 TESTS GENERATED:
+✅ 24 unit tests created for core functions
+✅ 8 integration tests generated
+✅ Test coverage: 89% (target: 80%)
+✅ Test suite ready for execution
+```
+- Unit and integration test creation
+- Framework detection (Jest, Mocha, etc.)
+- Real test coverage analysis
 
-### 🔒 **Security & Validation**
-- Vulnerability scanning
-- Security best practices enforcement
-- Code compliance checking
-- Risk assessment reports
+#### 📊 **Code Metrics Dashboard**
+```
+📊 CODE METRICS:
+✅ Code quality score: 8.7/10
+✅ Cyclomatic complexity: Average 3.2 (Good)
+✅ Technical debt: Low
+✅ Maintainability index: 85/100
+```
+- Live code quality scoring
+- Complexity analysis and technical debt tracking
+- Interactive metrics dashboard
 
-### ⚡ **Phase 5 Automation System**
-- **100% Automation Level** - Fully autonomous operation
-- **6 Core Components** - Complete development lifecycle coverage
-- **144KB Total Codebase** - Lightweight yet comprehensive
-- **Real-time Processing** - Instant feedback and suggestions
+## 📋 **Quick Start**
 
-## 📋 Quick Start
+### 1. **Installation**
+1. Open VS Code → Extensions (Ctrl+Shift+X)
+2. Search "HOILTD DeepSeek Code Companion"
+3. Click Install
 
-### Installation
-1. Open VS Code
-2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "DeepSeek Code Companion"
-4. Click Install
+### 2. **API Keys Setup**
+```json
+{
+  "deepseekCodeCompanion.deepseekApiKey": "sk-your-deepseek-key-here",
+  "deepseekCodeCompanion.openrouterApiKey": "sk-or-your-openrouter-key",
+  "deepseekCodeCompanion.dailyCostLimit": 5,
+  "deepseekCodeCompanion.showCostInChat": true
+}
+```
+- **DeepSeek API**: Get at [platform.deepseek.com](https://platform.deepseek.com/)
+- **OpenRouter API** (optional): Get at [openrouter.ai](https://openrouter.ai/) for 100+ models
 
-### Configuration
-1. Open VS Code Settings (Ctrl+,)
-2. Search for "DeepSeek Code Companion"
-3. Add your DeepSeek API key:
-   ```json
-   {
-     "deepseekCodeCompanion.apiKey": "your-deepseek-api-key-here"
-   }
-   ```
+### 3. **Start Using**
+- **Chat**: Click DeepSeek icon in Activity Bar
+- **Phase 5**: Use Command Palette (Ctrl+Shift+P) → "DeepSeek: Phase 5"
 
-### Usage
-Access all features through the Command Palette (Ctrl+Shift+P):
+## 🎯 **How to Use Effectively**
 
-- `DeepSeek: Analyze Code` - Comprehensive code analysis
-- `DeepSeek: Generate Documentation` - Create project documentation
-- `DeepSeek: Generate Tests` - Automated test generation
-- `DeepSeek: Security Scan` - Security vulnerability assessment
-- `DeepSeek: Phase 5 Analysis` - Advanced AI-powered insights
+### **For Multi-Model AI Chat:**
+- Switch between DeepSeek, GPT-4, Claude, and 100+ models
+- Ask about your code files with full workspace context
+- Get cost-effective AI assistance with real-time tracking
 
-## 🚀 Phase 5 Commands
+### **For Phase 5 Automation:**
+**Command Palette (Ctrl+Shift+P):**
+- `DeepSeek: Phase 5 - Security Scan` → Full security audit
+- `DeepSeek: Phase 5 - Generate Documentation` → Auto-create docs
+- `DeepSeek: Phase 5 - Generate Tests` → Create test files
+- `DeepSeek: Phase 5 - Show Metrics Dashboard` → Code quality analysis
+- `DeepSeek: Phase 5 - Run Automation` → Complete workflow
+- `DeepSeek: Phase 5 - Demo Features` → See what it can do
 
-| Command | Description | Automation Level |
-|---------|-------------|------------------|
-| **Code Analysis** | Deep code inspection with AI insights | 100% |
-| **Documentation** | Intelligent README and API docs | 100% |
-| **Test Generation** | Comprehensive test suite creation | 100% |
-| **Security Scan** | Advanced vulnerability detection | 100% |
-| **Performance Review** | Optimization recommendations | 100% |
-| **Architecture Analysis** | System design evaluation | 100% |
+## 💡 **Best Use Cases**
 
-## 💡 Why Choose DeepSeek Code Companion?
+### **🎯 Perfect for developers who want:**
+- Freedom to choose the best AI model for each task
+- Transparency in AI costs and usage  
+- Deep workspace understanding across all models
+- Real automation beyond basic chat
+- Professional code analysis and documentation
 
-- **🎯 Precision**: Advanced AI algorithms for accurate analysis
-- **⚡ Speed**: Real-time processing with instant feedback
-- **🛡️ Security**: Built-in security scanning and best practices
-- **📈 Productivity**: Automated workflows save hours of manual work
-- **🔧 Flexibility**: Configurable to match your development style
-- **🌟 Innovation**: Cutting-edge Phase 5 automation technology
+### **🚀 Ideal for projects needing:**
+- Security compliance and vulnerability scanning
+- Automated documentation generation
+- Comprehensive test coverage
+- Code quality monitoring and improvement
 
-## 📊 System Requirements
-
-- VS Code 1.74.0 or higher
-- Internet connection for DeepSeek API
-- Node.js 16+ (for advanced features)
-
-## 🔧 Configuration Options
+## ⚙️ **Configuration Options**
 
 ```json
 {
-  "deepseekCodeCompanion.apiKey": "your-api-key",
-  "deepseekCodeCompanion.autoAnalysis": true,
+  "deepseekCodeCompanion.defaultModel": "deepseek-chat",
+  "deepseekCodeCompanion.autoSwitchToDeepSeek": true,
   "deepseekCodeCompanion.securityLevel": "high",
   "deepseekCodeCompanion.documentationStyle": "detailed",
   "deepseekCodeCompanion.testingFramework": "auto-detect"
 }
 ```
 
-## 📖 Documentation
+## 🛠️ **System Requirements**
 
-- [Getting Started Guide](docs/getting-started.md)
-- [API Reference](docs/api-reference.md)
-- [Configuration Guide](docs/configuration.md)
-- [Troubleshooting](docs/troubleshooting.md)
+- **VS Code**: 1.74.0 or higher
+- **Internet**: Required for AI API access  
+- **Node.js**: 16+ (for Phase 5 features)
+- **Storage**: ~130KB extension size
 
-## 🤝 Contributing
+## 🔧 **Troubleshooting**
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+**❌ API Key Issues:** Check settings and verify key validity  
+**❌ Phase 5 Not Working:** Restart VS Code, ensure workspace has code files  
+**❌ Chat Not Responding:** Check internet connection and API key configuration  
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- 📧 Email: support@hoiltd.com
-- 💬 Issues: [GitHub Issues](https://github.com/hoiltd/deepseek-code-companion/issues)
-- 📚 Documentation: [Wiki](https://github.com/hoiltd/deepseek-code-companion/wiki)
-
-## 🏆 Changelog
-
-### Version 1.0.0
-- ✅ Phase 5 Automation System (100% automation)
-- ✅ Complete code analysis suite
-- ✅ Advanced documentation generation
-- ✅ Comprehensive testing automation
-- ✅ Security scanning and validation
-- ✅ Performance optimization tools
+**✅ Quick Test:** Run `Phase 5 - Demo Features` to verify installation
 
 ---
 
-**Made with ❤️ by HOILTD** | **Powered by DeepSeek AI**
+## 🆘 **Support & Contributing**
+
+- 📧 **Support**: support@hoiltd.com
+- 💬 **Issues**: [GitHub Issues](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion/issues)
+- 📚 **Documentation**: [Wiki](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/deepseek-code-companion/wiki)
+- 🤝 **Contributing**: See [Contributing Guide](CONTRIBUTING.md)
+- 📄 **License**: MIT License - see [LICENSE](LICENSE)
+
+---
+
+**🏢 Made in London by Home & Office Improvements Ltd** | **⚡ Powered by DeepSeek AI & OpenRouter**

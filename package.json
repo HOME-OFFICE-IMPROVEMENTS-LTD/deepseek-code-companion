@@ -4,6 +4,10 @@
   "description": "Professional AI coding assistant with DeepSeek integration, advanced automation features, and comprehensive development tools for VS Code.",
   "version": "1.0.0",
   "publisher": "hoiltd",
+  "author": {
+    "name": "MOHAMMAD AL-SOURI",
+    "email": "info@hoiltd.co.uk"
+  },
   "icon": "images/deepseek-icon-128.png",
   "repository": {
     "type": "git",
