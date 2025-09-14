@@ -5,6 +5,9 @@ node_modules
 .vscode-test/
 *.vsix
 
+# VS Code settings with sensitive data
+.vscode/settings.json
+
 # Logs
 logs
 *.log

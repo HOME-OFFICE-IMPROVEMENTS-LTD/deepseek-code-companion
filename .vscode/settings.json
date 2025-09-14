@@ -18,11 +18,11 @@
 	"debug.showBreakpointsInOverviewRuler": true,
 	"terminal.integrated.accessibleViewPreserveCursorPosition": true,
 	"terminal.integrated.ignoreBracketedPasteMode": true,
-	"deepSeek.apiKey": "sk-64af3c31a7de431fbb3225770e2c36c9",
+	"deepSeek.apiKey": "your-deepseek-api-key-here",
 	"github.copilot.chat.agent.thinkingTool": true,
 	"editor.defaultFormatter": "GitHub.copilot",
 	"notebook.defaultFormatter": "GitHub.copilot",
-	"deepseekCodeCompanion.deepseekApiKey": "sk-61b07d35615340fd91ccbf61c5c0d14d",
-	"deepseekCodeCompanion.openrouterApiKey": "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",
+	"deepseekCodeCompanion.deepseekApiKey": "your-deepseek-api-key-here",
+	"deepseekCodeCompanion.openrouterApiKey": "your-openrouter-api-key-here",
 	"chat.mcp.autostart": "newAndOutdated"
 }
