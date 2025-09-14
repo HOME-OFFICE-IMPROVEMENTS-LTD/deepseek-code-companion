@@ -100,6 +100,13 @@ The extension's standout feature - real automation that actually works:
 3. Click Install
 
 ### 2. **API Keys Setup**
+
+⚠️ **Security Note**: Keep your API keys secure! Never commit them to version control.
+
+#### **Method 1: VS Code Settings (Recommended)**
+1. Copy `.vscode/settings.example.json` to `.vscode/settings.json`
+2. Replace placeholder values with your actual API keys:
+
 ```json
 {
   "deepseekCodeCompanion.deepseekApiKey": "sk-your-deepseek-key-here",
@@ -108,6 +115,11 @@ The extension's standout feature - real automation that actually works:
   "deepseekCodeCompanion.showCostInChat": true
 }
 ```
+
+#### **Method 2: Global Settings** 
+Open VS Code Settings (Ctrl/Cmd + ,) and search for "deepseek" to configure globally.
+
+#### **Get Your API Keys:**
 - **DeepSeek API**: Get at [platform.deepseek.com](https://platform.deepseek.com/)
 - **OpenRouter API** (optional): Get at [openrouter.ai](https://openrouter.ai/) for 100+ models
 

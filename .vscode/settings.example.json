@@ -1,0 +1,26 @@
+{
+	"files.exclude": {
+		"out": false,
+		"dist": false
+	},
+	"search.exclude": {
+		"out": true,
+		"dist": true
+	},
+	"typescript.tsc.autoDetect": "off",
+	"editor.experimental.preferTreeSitter.regex": true,
+	"diffEditor.experimental.useTrueInlineView": true,
+	"workbench.commandPalette.preserveInput": true,
+	"debug.allowBreakpointsEverywhere": true,
+	"debug.console.acceptSuggestionOnEnter": "on",
+	"debug.showBreakpointsInOverviewRuler": true,
+	"terminal.integrated.accessibleViewPreserveCursorPosition": true,
+	"terminal.integrated.ignoreBracketedPasteMode": true,
+	"deepSeek.apiKey": "your-deepseek-api-key-here",
+	"deepseekCodeCompanion.deepseekApiKey": "your-deepseek-api-key-here",
+	"deepseekCodeCompanion.openrouterApiKey": "your-openrouter-api-key-here",
+	"github.copilot.chat.agent.thinkingTool": true,
+	"editor.defaultFormatter": "GitHub.copilot",
+	"notebook.defaultFormatter": "GitHub.copilot",
+	"chat.mcp.autostart": "newAndOutdated"
+}
