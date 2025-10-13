@@ -167,10 +167,10 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.18.3",
-    "@types/vscode": "^1.103.0",
+    "@types/vscode": "^1.105.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
-    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.34.0",
     "ts-loader": "^9.5.4",
